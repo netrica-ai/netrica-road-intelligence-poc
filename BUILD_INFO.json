@@ -1,0 +1,13 @@
+{
+  "site": "Netrica.AI Road Intelligence PoC",
+  "built": "2026-10-08 12:59 IST",
+  "base_url": "https://netrica-ai.github.io/netrica-road-intelligence-poc/",
+  "pages": [
+    "404.html",
+    "docs.html",
+    "index.html",
+    "report.html",
+    "validate.html"
+  ],
+  "source_build": "deploy/current"
+}

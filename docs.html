@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="cesium/Widgets/widgets.css">
+  <script src="cesium/Cesium.js"></script>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Netrica Road Intelligence — PoC Documentation</title>
+<meta name="description" content="Documentation for the Netrica.AI Road Intelligence proof of concept (Rodic InfraAI Innovation Challenge 2026): approach, technical implementation, tools, libraries and APIs, data sources, privacy and compliance, deployment, and the plan for a Rodic corridor." />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Instrument+Sans:ital,wght@0,400..700;1,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" />
+<style>
+  :root { --fg:#101a2e; --muted:#5f6a85; --bg:#fff; --alt:#f7f8fc; --deep:#eef0f8; --accent:#4f46e5; --tint:#e6e6fb;
+          --border:rgba(16,26,46,.14); --safe:#0e9f6e; --warn:#d97706; --bad:#e02d3c; --night:#131a33;
+          --display:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif; --body:'Instrument Sans',system-ui,sans-serif; --mono:'Spline Sans Mono',ui-monospace,monospace; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font:16px/1.55 var(--body); color:var(--fg); background:var(--bg); }
+  a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+  .top { position:sticky; top:0; z-index:5; background:rgba(255,255,255,.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); }
+  .top .in { max-width:1040px; margin:0 auto; padding:.55rem 1.25rem; display:flex; align-items:center; gap:.8rem; font-size:.9rem; }
+  .top b { font-family:var(--display); } .top .sp { flex:1; }
+  .top a.btn { border:1px solid var(--border); border-radius:8px; padding:.35rem .65rem; color:var(--fg); font-weight:600; font-size:.84rem; }
+  .top a.btn:hover { border-color:var(--accent); color:var(--accent); text-decoration:none; }
+  main { max-width:1040px; margin:0 auto; padding:2.2rem 1.25rem 4rem; }
+  .kicker { font:600 .72rem/1.2 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+  h1 { font:700 clamp(1.8rem,3vw,2.5rem)/1.1 var(--display); letter-spacing:-.01em; margin:.4rem 0 .6rem; }
+  h2 { font:700 1.45rem/1.2 var(--display); margin:2.4rem 0 .6rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+  h3 { font:600 1.05rem/1.3 var(--display); margin:1.4rem 0 .4rem; }
+  p, li { max-width:80ch; }
+  .meta { color:var(--muted); font-size:.92rem; } .meta b { color:var(--fg); }
+  .lead { font-size:1.08rem; }
+  table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.7rem 0 .4rem; }
+  th, td { padding:.42rem .6rem; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+  th { background:var(--deep); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  .cap { font-size:.84rem; color:var(--muted); margin:0 0 1rem; max-width:none; }
+  .note { border-left:4px solid var(--accent); background:var(--alt); padding:.7rem 1rem; border-radius:8px; margin:1rem 0; font-size:.93rem; }
+  .warn { border-left-color:var(--warn); }
+  code { font-family:var(--mono); font-size:.86em; background:var(--deep); padding:.05em .3em; border-radius:4px; }
+  pre { background:var(--night); color:#e5e7eb; border-radius:10px; padding:.9rem 1rem; font:.8rem/1.45 var(--mono); overflow:auto; }
+  pre .c { color:#9ca3af; }
+  .arch { display:grid; grid-template-columns:repeat(5,1fr); gap:.5rem; margin:1rem 0; }
+  @media (max-width:900px) { .arch { grid-template-columns:1fr 1fr; } }
+  .arch div { border:1px solid var(--border); border-radius:10px; padding:.7rem .8rem; font-size:.86rem; background:#fff; }
+  .arch b { display:block; font:600 .7rem/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:.3rem; }
+  .toc { columns:2; column-gap:2rem; font-size:.92rem; margin:1rem 0 0; padding-left:1.2rem; }
+  .toc li { margin:.15rem 0; break-inside:avoid; }
+  .pill { display:inline-block; font:600 .68rem/1 var(--mono); letter-spacing:.06em; padding:.25rem .5rem; border-radius:6px; vertical-align:middle; }
+  .live { background:#d1fae5; color:#065f46; } .next { background:#fef3c7; color:#92400e; } .dev { background:var(--deep); color:var(--muted); }
+  footer { border-top:1px solid var(--border); margin-top:3rem; padding-top:1rem; color:var(--muted); font-size:.86rem; }
+  @media print { .top { display:none; } main { padding:0; max-width:none; } h2 { break-after:avoid; } table, pre { break-inside:avoid; } body { font-size:11.5px; } @page { margin:16mm 14mm; } }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><b>Netrica.AI</b><span>Road Intelligence · PoC documentation</span><span class="sp"></span>
+  <a class="btn" href="index.html">← Live PoC app</a><a class="btn" href="report.html">Testing report</a><a class="btn" href="javascript:window.print()">Print / PDF</a></div></div>
+<main>
+  <span class="kicker">Rodic InfraAI Innovation Challenge 2026 · AI for Roads, Bridges &amp; Tunnels · Team Netrica AI</span>
+  <h1>PoC Documentation: approach, implementation, tools, data and compliance</h1>
+  <p class="meta"><b>Netrica.AI Private Limited</b> with the GeoAI4Cities Laboratory, IISER Bhopal · Version 1.0 · 4 October 2026 · SPOC Pyare Lal · netrica.ai@gmail.com</p>
+
+  <ol class="toc">
+    <li><a href="#d1">Use case and approach</a></li><li><a href="#d2">System architecture</a></li><li><a href="#data">Data sources and datasets</a></li>
+    <li><a href="#d4">Technical implementation, stage by stage</a></li><li><a href="#d5">Standards and accessibility codes</a></li>
+    <li><a href="#d6">The delivered application</a></li><li><a href="#d7">Tools, libraries and APIs</a></li><li><a href="#d8">Data privacy, protection and compliance</a></li>
+    <li><a href="#d9">Deployment options and requirements</a></li><li><a href="#d10">Plan for a Rodic corridor</a></li><li><a href="#d11">Originality and open-source acknowledgements</a></li><li><a href="#d12">Team and contact</a></li>
+  </ol>
+
+  <h2 id="d1">1 · Use case and approach</h2>
+  <p class="lead">Road owners and their consultants increasingly hold mobile-LiDAR surveys and "digital twins" of their networks, but the intelligence on top of that
+    data is still produced by hand: asset inventories, usable carriageway width, vertical clearance, encroachment and norm compliance are digitised point by point.
+    Netrica automates that layer. From an existing survey, with no additional field work, the pipeline returns a per-station corridor-geometry profile, the asset
+    classes along it, standards flags against Indian norms, and a per-vehicle passability verdict that can gate routing.</p>
+  <p><b>Approach in one sentence.</b> Segment the point cloud with a Point Transformer V3 foundation encoder adapted to Indian streets; measure the carriageway from the
+    road points themselves (not from lane markings); measure overhead clearance per obstruction stream; fuse width and clearance into standards-based classes;
+    transfer the result to the road graph; and deliver it as GIS layers and a static web application the owner can host.</p>
+  <p><b>Why it is different.</b> (i) Width and clearance are assessed <i>together</i> against the vehicles that must pass; (ii) cross-city deployment uses model merging, so the
+    model travels and the data stays; (iii) a training-free junction detector handles irregular Indian geometry; (iv) every output carries its evidence and a human sign-off step.</p>
+
+  <h2 id="d2">2 · System architecture</h2>
+  <div class="arch">
+    <div><b>1 · Ingest</b>LAS/LAZ + vehicle trajectory. Tiling (5 m), ground filtering, trajectory-based corridor extraction. Any MLS platform.</div>
+    <div><b>2 · Segment</b>PTv3 foundation encoder (Sonata / Concerto / Utonia) fine-tuned per city; merged in weight space for a new city; 12-class taxonomy (62 categories in Bhopal).</div>
+    <div><b>3 · Measure</b>Road occupancy → boundary → medial centreline → junctions (orientation-field defects) → width per station; clearance per stream; multi-drive fusion.</div>
+    <div><b>4 · Certify</b>IRC / CMVR tiers W0–W4, H0–H3, A0–A3; per-vehicle code; alignment to the OSM graph; accessibility-gated routing.</div>
+    <div><b>5 · Deliver</b>GeoJSON / GeoPackage, 3D Tiles, classified PLY scenes, routing graph JSON, static web app, PDF audit; REST endpoint on request.</div>
+  </div>
+  <p>Stages 1–4 run as a batch pipeline (Python / PyTorch) on the owner's GPU host or ours; stage 5 is a static site (Vite + TypeScript) that reads the exported files, so
+    there is no server-side component to secure or scale. The three-city PoC on this site is exactly that export.</p>
+
+  <h2 id="data">3 · Data sources and datasets</h2>
+  <table>
+    <thead><tr><th>Dataset</th><th>Source and rights</th><th>Size and content</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td><b>BhopalMLS</b> (Bhopal old city)</td><td>Own capture by the GeoAI4Cities Lab, IISER Bhopal (March 2023), handheld GeoSLAM ZEB Horizon (Velodyne VLP-16, 360° camera), DGPS georeferencing. Research dataset; manuscript under review.</td><td>8 survey drives through the historic core; ~1.2 billion points in the full dataset; manually labelled in 62 static categories mapped to 12 classes; 2,829 pts/m² under the common protocol; RGB on 35–40% of points.</td><td>Training, validation, test; all Bhopal layers in the app</td></tr>
+      <tr><td><b>Kerala MLS</b> (Ke-MLS)</td><td>Published labelled Indian MLS dataset (IISER Bhopal with IIT Kanpur; <i>Environment and Planning B</i>, 2026, doi:10.1177/23998083261430812). Vehicle-mounted Riegl VQ-450, 2020.</td><td>Semi-urban corridors; point-wise labels shipped with the dataset; 1,787 pts/m²; coordinates, intensity, labels (no colour).</td><td>Training, validation, test; Kerala layers</td></tr>
+      <tr><td><b>Chandigarh MLS</b></td><td>StreetMapper survey (dual Riegl VQ-450, panoramic camera, GNSS/IMU) by Geokno India for the Chandigarh Administration, 2020; processed by the lab under agreement; labelled to the Kerala protocol.</td><td>Planned-grid avenues and sectors; 2,224 pts/m²; intensity only.</td><td>Training, validation, test; Chandigarh layers</td></tr>
+      <tr><td><b>OpenStreetMap</b></td><td>© OpenStreetMap contributors, ODbL.</td><td>Road graph, hospitals and fire stations for routing; aligned to the LiDAR centrelines.</td><td>Network transfer and routing</td></tr>
+      <tr><td><b>Public benchmarks</b> (Toronto-3D, Paris-Lille-3D, SemanticKITTI)</td><td>Public research datasets under their own licences.</td><td>Cross-region transfer experiments only.</td><td>Evaluation; not deployed</td></tr>
+      <tr><td><b>Basemaps</b></td><td>OpenStreetMap tiles and Esri World Imagery, streamed by the viewer under the providers' terms.</td><td>Visual context in the map.</td><td>Display only</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">Ground truth for geometric validation (13 hand-traced carriageway polygons, 215 labelled junctions, stratified hand-measured stations) was digitised by the team on the MLS reference; see the testing report §2.</p>
+  <h3>Hand-off format for a partner corridor</h3>
+  <p>LAS/LAZ 1.2–1.4 with GPS time, intensity and (if available) RGB; the vehicle trajectory (SBET/CSV, or GPS-time-tagged positions); the CRS (EPSG code); nominal density ≥ 100 pts/m² for the width chain, higher preferred for wires. Imagery is optional and, when supplied, is anonymised before use.</p>
+
+  <h2 id="d4">4 · Technical implementation, stage by stage</h2>
+  <h3>4.1 Ingest and representation</h3>
+  <ul>
+    <li>Tiling into 5 m scenes along the trajectory; 25 cm voxel protocol for training statistics; width is <i>measured at full resolution</i> because subsampling shifts kerb-to-kerb extremes by up to a voxel at exactly the 3.0–3.5 m thresholds.</li>
+    <li>Nine input channels: xyz, RGB (zero-filled where the survey has none), intensity, normals. Colour channels are therefore optional.</li>
+    <li>No denoising: three outlier filters were scored against hand-traced polygons and rejected (they removed boundary points and worsened width error).</li>
+  </ul>
+  <h3>4.2 Semantic segmentation and cross-city deployment</h3>
+  <ul>
+    <li>Encoders: Point Transformer V3 family foundation models (Sonata, Concerto, Utonia) via Pointcept; protocols evaluated: linear probe, decoder probe, full fine-tuning. Deployed: fine-tuned Utonia / Concerto per city.</li>
+    <li>Cross-city deployment by <b>multi-city model merging</b>: task vectors (fine-tuned minus shared pre-trained initialisation) combined in weight space; the <i>encoder</i> is merged and each target city's segmentation head re-attached. The merged model has the same inference cost as a single model. A shared pre-trained initialisation is required (violating it collapses the merge).</li>
+    <li>The deployed configuration is selected on <i>accessibility fidelity</i> (agreement of the resulting W/H/A map with the hand-label run), not on mIoU alone.</li>
+  </ul>
+  <h3>4.3 Carriageway boundary, centreline, junctions and width</h3>
+  <ul>
+    <li>Road-class points → occupancy mask → hole filling (parked-vehicle scan shadows) → boundary extraction and refinement; divided carriageways are split at the median by a class-aware carve.</li>
+    <li>Medial-axis centreline; stations every 5–10 m; width read as the kerb-to-kerb extreme across the station transect. Junction-mouth flares and sparse-shoulder balloons are removed as outliers (a reading wider than 1.4× the 35th percentile of its neighbours within 4 m, or 1.6× the median near a junction); <i>narrow</i> readings are never dropped because a genuine pinch must survive; readings under 1 m are raster artefacts.</li>
+    <li><b>Junctions</b> are detected as topological defects in a nematic orientation field over the road points (scalar order parameter for directional coherence; Poincaré index for defect charge). A through-road has high order; an intersection is where order breaks and a half-integer defect appears. Types: T/Y, 4-way (+), skew (X), roundabout. Training-free; outperforms a detector on learned 3D features (quality 0.671 vs 0.548).</li>
+    <li><b>Width-uncertain (WU) policy:</b> side streets the scanner only grazes have a boundary set by the survey footprint, not the road; such stations are reported as WU, excluded from certification and routing.</li>
+  </ul>
+  <h3>4.4 Overhead clearance and binding object</h3>
+  <ul>
+    <li>Three streams above the drivable band: wire, structure (shop shades, boards, bridges, connectors), vegetation. Clearance at a station = lowest object in the band; the binding stream and the binding object class (from the 62-category taxonomy in Bhopal) are recorded.</li>
+    <li>Wires: per-span quadratic sag fit on spans ≥ 5 m, accepted at RMSE ≤ 0.25 m; gaps ≤ 15 m bridged; isolated returns removed by a statistical filter kept as a visible layer in the audit viewer.</li>
+    <li>Critical stations (where clearance crosses a vehicle threshold) keep their point evidence so an engineer can inspect the exact returns.</li>
+  </ul>
+  <h3>4.5 Multi-drive reconciliation</h3>
+  <p>Where a street was driven more than once, drives are conflated into one connected single-line graph; the fused width is the minimum safe reading across drives (closer repaired, excluded endpoints ringed). Transient narrowing (parked or moving vehicles) is attributed by a ground-cause label and a transient level T0–T3 on hand-labelled drives.</p>
+  <h3>4.6 Network transfer and routing</h3>
+  <ul>
+    <li>The LiDAR centreline is aligned to the OSM road graph (raw and aligned OSM both shown in the app); each OSM edge receives the minimum width and clearance along it and a 3-bit block code per vehicle class (width / wire-structure / vegetation).</li>
+    <li>Routing: shortest, fastest and accessibility-gated variants by Dijkstra or A* over the exported graph; unsurveyed edges are passable by policy (uncertainty never manufactures a block) and the share of a route on unsurveyed road is reported.</li>
+    <li>In the application the routing runs client-side in TypeScript (<code>src/routing/graph.ts</code>), 0.25–2.5 ms per query on 250–1,400-node city graphs.</li>
+  </ul>
+
+  <h2 id="d5">5 · Standards and accessibility codes</h2>
+  <table>
+    <thead><tr><th>Scale</th><th>Classes and cuts</th><th>Basis</th></tr></thead>
+    <tbody>
+      <tr><td>Width W</td><td>W0 &lt; 3.0 · W1 3.0–3.5 · W2 3.5–5.5 · W3 5.5–7.0 · W4 ≥ 7.0 m · WU one-sided</td><td>IRC:86-2018 lane classes (residential access, urban single lane, intermediate, two-lane)</td></tr>
+      <tr><td>Clearance H</td><td>H0 &lt; 2.8 · H1 2.8–3.8 · H2 3.8–5.0 · H3 ≥ 5.0 m</td><td>CMVR 1989 vehicle-height cap 3.8 m; IRC:54 minimum vertical road clearance 5.0 m; overhead wires per IRC:32-1969</td></tr>
+      <tr><td>Accessibility A = W × H</td><td>A0 fails either axis · A1 ≥ W1 ∧ ≥ H1 · A2 ≥ W2 ∧ ≥ H2 · A3 ≥ W2 ∧ H3 · AU width-uncertain</td><td>Fusion rule; A1 admits an ambulance, A2 a fire truck, A3 an aerial appliance</td></tr>
+      <tr><td>Per-vehicle thresholds</td><td>Ambulance 3.0 / 3.5 m · Fire truck 3.5 / 4.5 m · Aerial appliance 3.5 / 5.0 m (passage width / clearance)</td><td>National Ambulance Code AIS-125 platforms; CMVR 2.5 m width cap for truck chassis; aerial outrigger set-up footprint treated separately</td></tr>
+      <tr><td>Context norms</td><td>Fire-access width 6 m and 9 m turning radius (NBC 2016 Part 3); accessibility (Harmonised Guidelines) for footpath work</td><td>Reported as flags where applicable; not part of the passability code</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">The scales are vehicle-independent, so the same layers serve freight, service and planning access; the per-vehicle code applies each vehicle's exact envelope within its named class.</p>
+
+  <h2 id="d6">6 · The delivered application</h2>
+  <ul>
+    <li><b>Home</b> (<code>index.html</code>): live KPI tiles computed in the browser from the served station layers; the network map with click-to-route; the classified 3D scene explorer; the embedded corridor audit; deployment notes.</li>
+    <li><b>Network map</b>: CesiumJS, 2D/3D, OSM or satellite basemap; city selection; OSM ↔ LiDAR alignment overlay; <i>Categorize</i> by W / H / A class; fused-width overlay (Bhopal); 🚑 Route with class, gate and algorithm selectors; info cards with measured values; full screen.</li>
+    <li><b>3D scenes</b>: three.js PLY viewer with class ↔ RGB toggle, click-to-identify, two-point distance measurement, eye-dome depth shading; three themed scenes per city.</li>
+    <li><b>Corridor audit</b> (<code>validate.html</code>): per-path, step-by-step replay of the width chain, the clearance chain and the fused verdict, with ground-truth overlays and a <i>Deployment</i> panel on predicted labels; keyboard navigation between paths.</li>
+    <li><b>Formats served</b>: GeoJSON (EPSG:32643) station, junction, centreline, OSM-aligned and categorisation layers; routing graph JSON; classified PLY; 3D Tiles; JSON manifests.</li>
+  </ul>
+  <pre>{
+  "type": "Feature",
+  "geometry": { "type": "LineString", "coordinates": [...] },   <span class="c">// one 5–10 m station, EPSG:32643</span>
+  "properties": { "path": "Bhopal_1", "wm": 6.99, "w": 4, "hm": 3.94, "h": 2, "a": 2,
+                  "bind": "Wire", "bstream": "wire" }             <span class="c">// width m/class, clearance m/class, A-class, binding object</span>
+}</pre>
+  <p class="cap">Routing-graph edges carry <code>len_m</code>, speed, and per-class block bits (1 = width, 2 = wire/structure, 4 = vegetation). A GeoPackage export with the same schema is produced by the batch pipeline for GIS users.</p>
+
+  <h2 id="d7">7 · Tools, libraries and APIs</h2>
+  <table>
+    <thead><tr><th>Component</th><th>Tool / library</th><th>Licence</th><th>Role</th></tr></thead>
+    <tbody>
+      <tr><td>Segmentation</td><td>PyTorch; Pointcept; Point Transformer V3 encoders Sonata, Concerto, Utonia (pre-trained weights from their authors)</td><td>BSD-3 / MIT / model licences as published</td><td>Fine-tuning, merging, inference</td></tr>
+      <tr><td>Point-cloud processing</td><td>NumPy, SciPy, Open3D, laspy / PDAL</td><td>BSD / MIT</td><td>Tiling, ground filtering, geometry, statistical filters</td></tr>
+      <tr><td>Vector geometry and GIS</td><td>Shapely, GeoPandas, pyproj / proj4js, GDAL/OGR</td><td>BSD / MIT</td><td>Boundaries, transects, alignment, exports (GeoJSON, GeoPackage)</td></tr>
+      <tr><td>Road graph</td><td>OpenStreetMap data (ODbL); NetworkX for batch simulations; own Dijkstra / A* in TypeScript for the app</td><td>ODbL / BSD / own</td><td>Network transfer, routing</td></tr>
+      <tr><td>Web map</td><td>CesiumJS (3D Tiles, imagery layers: OpenStreetMap, Esri World Imagery)</td><td>Apache-2.0; tile providers' terms</td><td>Network map, routing UI</td></tr>
+      <tr><td>3D viewers</td><td>three.js (PLYLoader, OrbitControls)</td><td>MIT</td><td>Scene explorer, corridor audit viewer</td></tr>
+      <tr><td>Application build</td><td>Vite, TypeScript, vite-plugin-cesium</td><td>MIT</td><td>Static multi-page build</td></tr>
+      <tr><td>Privacy tooling</td><td>SAM 3 (segmentation of faces, heads, number plates)</td><td>as published by Meta</td><td>Blurring of any imagery shown; see §8</td></tr>
+      <tr><td>Tiling</td><td>Own LAZ → 3D Tiles exporter (py3dtiles-style point tiles with class attribute)</td><td>own</td><td>Classified clouds in the map</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">No proprietary SDKs, no paid APIs and no cloud services are required to run the PoC. The application makes no network calls other than fetching its own files and basemap tiles.</p>
+
+  <h2 id="d8">8 · Data privacy, protection and compliance</h2>
+  <ul>
+    <li><b>No personal data in the product.</b> The pipeline's inputs are LiDAR geometry (and optionally intensity/colour); its outputs are geometry, classes and derived measures. No names, identifiers, trajectories of persons, number plates or faces are stored or served.</li>
+    <li><b>Imagery is anonymised before use.</b> Where street-level imagery is used in development, faces, heads and number plates are detected (SAM 3, score ≥ 0.30 plus a head band on every person) and mosaicked/blurred; coloured points whose colour came from a blurred pixel are recoloured, and points predicted as persons have their colour zeroed. The build refuses to publish any raster or cloud without a current blurred copy (a hash-checked gate), and a separate gate verifies that no person points in the served scenes carry colour.</li>
+    <li><b>Data sovereignty.</b> Cross-city capability is transferred by model merging; raw survey data never leaves its owner. The delivery layer can be hosted entirely on the owner's infrastructure. This is consistent with the Guidelines for acquiring and producing Geospatial Data and Geospatial Data Services (DST, 2021) for Indian entities and with the data-minimisation principle of the Digital Personal Data Protection Act, 2023.</li>
+    <li><b>Ethics.</b> The Bhopal data collection is covered by an IISER Bhopal Department Level Ethics Committee approval (IISERB/DLEC/2026-27/06, 15 September 2026).</li>
+    <li><b>Responsible AI.</b> Every automated flag carries its measured evidence, the binding object and a standards class; a compliance verdict is signed off by an engineer in the audit viewer before it is issued. Uncertainty is reported, never converted into a block (unsurveyed road is passable by policy and labelled as such). Models are trained on three urban forms to limit single-city bias; the data-source and assumption log travels with each report.</li>
+    <li><b>Application security.</b> Static files only; no accounts, cookies, trackers or analytics; search engines are asked not to index the PoC. Access control, if required, is applied at the host (IP allow-list or basic auth).</li>
+  </ul>
+
+  <h2 id="d9">9 · Deployment options and requirements</h2>
+  <table>
+    <thead><tr><th>Layer</th><th>Requirement</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Batch pipeline</td><td>Linux host, Python 3.10+, PyTorch with CUDA; one NVIDIA A100 / L40S-class GPU (48–80 GB) for segmentation; 64 GB RAM; fast local disk for the corridor's LAZ tiles</td><td>Geometry, standards and routing stages run on CPU; the GPU is needed only for inference (and fine-tuning when labels exist)</td></tr>
+      <tr><td>Delivery</td><td>Any static web host or object store (on-premise Nginx/Apache, S3/MinIO, GitHub Pages, Cloudflare Pages); ~1 GB for three cities</td><td>No backend; HTTPS recommended; optional IP allow-list</td></tr>
+      <tr><td>Client</td><td>WebGL 2 browser; laptop or larger screen for the audit viewer</td><td>Mobile browsers show the map and KPIs</td></tr>
+      <tr><td>GIS consumers</td><td>QGIS, ArcGIS, PostGIS</td><td>GeoJSON / GeoPackage in the owner's CRS</td></tr>
+      <tr><td>Integration</td><td>REST endpoint (read-only) and a schema-mapping table from our classes to the owner's asset register</td><td>Provided on request during the pilot</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="d10">10 · Plan for a Rodic corridor</h2>
+  <ol>
+    <li><b>Day 0–1 · Data in.</b> Rodic shares a LAS/LAZ sample with trajectory and CRS (5–20 km; Mumbai twin or an OPRMC stretch) under NDA; we confirm density and coverage and return a tiling report.</li>
+    <li><b>Day 1–3 · Segmentation.</b> Merged encoder for the new city; spot check of the 12 classes with Rodic engineers; optional short fine-tune if Rodic supplies labelled stretches.</li>
+    <li><b>Day 3–6 · Measurement and certification.</b> Width, clearance, binding object, junctions, standards flags, per-vehicle passability; multi-drive fusion where repeated; transfer to the road graph.</li>
+    <li><b>Day 6–8 · Deliverables.</b> The web application on the corridor (same UI as this PoC), GeoJSON / GeoPackage layers, the per-object asset register (class, position, height, offset from centreline) as GeoPackage, a PDF audit, and a validation note against a Rodic-nominated sample stretch.</li>
+  </ol>
+  <p><b>Acceptance targets</b> (from our application): asset detection precision/recall above 0.85 on the major classes; width and clearance within ±0.15 m of manual measurement on a sample stretch; end-to-end processing under one hour per 10 km on a single GPU. <b>Status labels used throughout the PoC:</b>
+    <span class="pill live">live</span> running on this site · <span class="pill next">next</span> scheduled for the corridor run · <span class="pill dev">in development</span> not certified.</p>
+
+  <h2 id="d11">11 · Originality and open-source acknowledgements</h2>
+  <p>The pipeline, the measurement chain, the junction detector, the standards fusion, the routing gate, the validation and the application are the original work of Netrica.AI and the
+    GeoAI4Cities Laboratory, IISER Bhopal. We gratefully acknowledge the open-source components listed in §7 — PyTorch, Pointcept and the Point Transformer V3 family (Sonata, Concerto,
+    Utonia), Open3D, NumPy, SciPy, Shapely, GeoPandas, pyproj/proj4js, NetworkX, CesiumJS, three.js, Vite, TypeScript, SAM 3 — and the OpenStreetMap contributors (ODbL) and basemap
+    providers. Their licences are respected and preserved; no component is redistributed in modified form.</p>
+
+  <h2 id="d12">12 · Team and contact</h2>
+  <table>
+    <thead><tr><th>Name</th><th>Role</th><th>Background</th></tr></thead>
+    <tbody>
+      <tr><td>Pyare Lal</td><td>Director &amp; SPOC, Netrica.AI</td><td>PhD scholar, Data Science &amp; Engineering, GeoAI4Cities Lab, IISER Bhopal; 3D vision for urban systems; co-author of Ke-MLS and BhopalMLS; publications in Applied Intelligence, IJAEOG, Neurocomputing</td></tr>
+      <tr><td>Prachi Chachondhia</td><td>Director, Netrica.AI</td><td>PhD scholar (GeoAI), IISER Bhopal; former AI Scientist, iAssist Innovations Labs; street-view imagery and perception-based urban analysis; 1st prize DST Geo Innovation Challenge 2024</td></tr>
+      <tr><td>Dr. Vaibhav Kumar</td><td>Scientific Advisor</td><td>Assistant Professor and head, GeoAI4Cities Lab, IISER Bhopal (PhD IIT Bombay); PI of the DST project on emergency-vehicle accessibility from LiDAR; co-author Ke-MLS, BhopalMLS</td></tr>
+    </tbody>
+  </table>
+  <p>Netrica.AI Private Limited · incorporated 16 Feb 2026 · CIN U72100MP2026PTC082091 · DPIIT DIPP268522 · Udyam UDYAM-MP-10-0170528 · Registered office: IICE, IISER Bhopal, Bhauri, Bhopal 462066 ·
+    incubated at AIC IISER Pune (SEED) · <a href="https://netrica.co.in/">netrica.co.in</a> · netrica.ai@gmail.com · +91 95660 65406.</p>
+
+  <footer>Prepared for the Rodic InfraAI Innovation Challenge 2026 Proof-of-Concept round · Netrica.AI Private Limited with the GeoAI4Cities Laboratory, IISER Bhopal.</footer>
+</main>
+</body>
+</html>

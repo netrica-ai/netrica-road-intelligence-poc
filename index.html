@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="cesium/Widgets/widgets.css">
+  <script src="cesium/Cesium.js"></script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Netrica Road Intelligence — Proof of Concept</title>
+  <meta name="description" content="Netrica.AI proof of concept for the Rodic InfraAI Innovation Challenge 2026 (AI for Roads, Bridges & Tunnels): clear width, vertical clearance, binding objects, standards flags, vehicle passability and accessibility-gated routing from mobile LiDAR, running live in the browser on three Indian cities." />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='9' fill='%236366f1'/%3E%3Ccircle cx='14' cy='14' r='3' fill='white'/%3E%3Ccircle cx='20' cy='20' r='3.5' fill='white'/%3E%3Ccircle cx='26' cy='26' r='3' fill='white'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Instrument+Sans:ital,wght@0,400..700;1,400&family=Spline+Sans+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" />
+  <script type="module" crossorigin src="./assets/poc-Cf2HcZbq.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="./assets/main-CCxtWGS_.js">
+  <link rel="modulepreload" crossorigin href="./assets/asset-DvAnIZL7.js">
+  <link rel="stylesheet" crossorigin href="./assets/main-CUheNOrl.css">
+  <link rel="stylesheet" crossorigin href="./assets/poc-BQBRqHDC.css">
+</head>
+<body>
+
+<!-- ============================ TOP BAR ============================ -->
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brandline" href="#overview" aria-label="Netrica.AI">
+      <svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" rx="9" fill="#6366f1"/><path d="M8 8 L5.5 8 Q4 8 4 9.5 L4 30.5 Q4 32 5.5 32 L8 32" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/><path d="M32 8 L34.5 8 Q36 8 36 9.5 L36 30.5 Q36 32 34.5 32 L32 32" fill="none" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/><circle cx="14" cy="14" r="3" fill="#fff"/><circle cx="20" cy="14" r="1.8" fill="#fff" opacity=".4"/><circle cx="26" cy="14" r="1" fill="#fff" opacity=".15"/><circle cx="14" cy="20" r="1.8" fill="#fff" opacity=".35"/><circle cx="20" cy="20" r="3.5" fill="#fff"/><circle cx="26" cy="20" r="1.8" fill="#fff" opacity=".4"/><circle cx="14" cy="26" r="1" fill="#fff" opacity=".15"/><circle cx="20" cy="26" r="1.8" fill="#fff" opacity=".35"/><circle cx="26" cy="26" r="3" fill="#fff"/></svg>
+      <b>Netrica.AI</b><span>Road Intelligence · PoC</span>
+    </a>
+    <nav class="topnav" aria-label="Sections">
+      <a href="#overview">Overview</a>
+      <a href="#deployment">Network map</a>
+      <a href="#viewer">3D scenes</a>
+      <a href="#audit">Corridor audit</a>
+      <a href="#deploy">Deployment</a>
+      <a href="#evidence">Evidence</a>
+      <a class="ext" href="report.html">Testing report</a>
+      <a class="ext" href="docs.html">Documentation</a>
+    </nav>
+    <span class="badge" title="Rodic InfraAI Innovation Challenge 2026 · Theme 02"><i></i>LIVE PoC · RODIC INFRAAI 2026</span>
+  </div>
+</header>
+
+<!-- ============================ HERO ============================ -->
+<section class="poc-hero" id="overview">
+  <div class="in">
+    <div>
+      <span class="eyebrow">Rodic InfraAI Innovation Challenge 2026 · AI for Roads, Bridges &amp; Tunnels · Team Netrica AI</span>
+      <h1>The intelligence layer on the <em>LiDAR you already own</em>.</h1>
+      <p>Netrica reads a mobile-LiDAR survey of a road corridor and returns what a 2D map cannot: the
+        <b>usable carriageway width</b> at every station, the <b>vertical clearance</b> and the <b>object that binds it</b>
+        (wire, shop shade, tree canopy, structure), <b>junctions</b>, <b>IRC / CMVR standards flags</b>, and a
+        <b>per-vehicle passability verdict</b> that gates routing. This page is the working prototype: three Indian cities,
+        measured end to end, served as a static application you are running right now.</p>
+      <div class="cta-row">
+        <a class="btn-p" href="#deployment">▶ Open the live network map</a>
+        <a class="btn-s" href="#audit">Corridor audit viewer</a>
+        <a class="btn-s" href="report.html">Testing report</a>
+        <a class="btn-s" href="docs.html">Documentation</a>
+        <a class="btn-s" href="https://youtu.be/2_Fz2nl3AH0" target="_blank" rel="noopener">▶ Video · English (4:33)</a>
+        <a class="btn-s" href="https://youtu.be/MhNOUmDSMTQ" target="_blank" rel="noopener">▶ वीडियो · हिन्दी (4:37)</a>
+      </div>
+    </div>
+    <aside class="hero-card" aria-label="What is in this PoC">
+      <h3>What you can do here</h3>
+      <ul>
+        <li><b>Route a vehicle class</b> across a surveyed network and see exactly which stretch blocks it, and why <span class="pill live">live</span></li>
+        <li><b>Click any station</b> for its measured width, clearance, binding object and standards class <span class="pill live">live</span></li>
+        <li><b>Explore classified 3D scenes</b>: poles, wires, boards, fencing, vegetation, kerb-side objects; measure distances <span class="pill live">live</span></li>
+        <li><b>Audit a corridor</b> step by step against hand-digitised ground truth <span class="pill live">live</span></li>
+        <li><b>Run on a Rodic corridor</b> (LAS/LAZ + trajectory): same pipeline, one GPU, no field work <span class="pill next">next</span></li>
+      </ul>
+    </aside>
+  </div>
+</section>
+
+<!-- ============================ KPIs ============================ -->
+<section class="prose wide" id="numbers">
+  <h2><span class="kicker">Computed in your browser, now</span>Three cities, one engine</h2>
+  <p class="lead">The tiles below are calculated from the measured network layers served with this page
+    (<code>data/network/&lt;city&gt;_categorization.geojson</code>), not typed in. Every station carries its
+    measured width, binding clearance, binding object and standards classes; the map and the audit viewer read the same files.</p>
+  <div class="kpi-grid" id="kpi-grid"><div class="kpi"><p class="sub">Loading measured layers…</p></div></div>
+  <p class="kpi-note">A-classes (IRC / CMVR based): A1 admits an ambulance, A2 a fire truck, A3 an aerial appliance (full IRC width and
+    clearance); AU = width evidence one-sided (side-street stub), reported but never certified. Shares are over the certified
+    length (A0–A3). Numbers in the peer-reviewed-submission scope (routable main spine, hand-labelled clouds) are in the
+    <a href="report.html">testing report</a>.</p>
+</section>
+
+<!-- ============================ WHAT IT MEASURES ============================ -->
+<section class="band">
+  <div class="prose wide">
+    <h2><span class="kicker">One scan, several deliverables</span>What the engine extracts from a mobile-LiDAR survey</h2>
+    <div class="cards">
+      <div class="card-f"><div class="ic">↔</div><h3>Clear carriageway width</h3><p>Read from the road points themselves at every station, not from lane markings. Encroachments narrow the reading. Validated at 0.10 m mean absolute error against hand-traced boundaries.</p></div>
+      <div class="card-f"><div class="ic">↕</div><h3>Vertical clearance + binding object</h3><p>Lowest object over the drivable band, split into wire / structure (permanent) and vegetation (prunable), with the named object class that binds (wire, shop shade, advertisement board, tree canopy).</p></div>
+      <div class="card-f"><div class="ic">◈</div><h3>Asset &amp; utility classes</h3><p>12-class semantic segmentation (poles &amp; towers, wires, wire–structure connectors, boards, fencing, road-side objects, vehicles, vegetation, buildings, ground, road), trained on a 62-category Indian taxonomy.</p></div>
+      <div class="card-f"><div class="ic">✕</div><h3>Junctions</h3><p>A training-free detector reads intersections as topological defects in the road's orientation field; T/Y, 4-way, skew and rotary types. 215 hand-labelled junctions: completeness 0.80, correctness 0.85.</p></div>
+      <div class="card-f"><div class="ic">§</div><h3>Standards flags</h3><p>Width classes W0–W4 (IRC:86 lane classes), clearance classes H0–H3 (CMVR 3.8 m cap, IRC 5.0 m road clearance), fused accessibility classes A0–A3.</p></div>
+      <div class="card-f"><div class="ic">🚑</div><h3>Vehicle passability &amp; routing</h3><p>Per-vehicle verdicts (ambulance 3.0 / 3.5 m, fire truck 3.5 / 4.5 m, aerial appliance 3.5 / 5.0 m) transferred to the OSM road graph; accessibility-gated Dijkstra / A* routing runs client-side in milliseconds.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ LIVE MAP (ids shared with src/main.ts) ============================ -->
+<section id="deployment" class="prose wide">
+  <h2><span class="kicker">Live · network map &amp; routing</span>Where can this vehicle go, and what stops it?</h2>
+  <p class="muted">The map opens on Bhopal in 🚑 <i>Route</i> mode on a worked example: the shortest path from the hospital
+    is blocked for an ambulance by a low wire and a pinch, so the accessible route detours (about 0.7 km → 1.5 km).
+    Click two points for another pair, switch the <i>Class</i> to a fire truck or aerial appliance, change the
+    <i>Gate</i> to width-only or clearance-only, or pick another city. <i>Categorize</i> colours the surveyed network by
+    W / H / A class; 🧭 overlays the OSM mesh on the LiDAR centrelines.</p>
+  <div class="howto">
+    <div><b>1 · Pick</b>Click an origin (A) then a destination (B) on the surveyed network.</div>
+    <div><b>2 · Read</b>Shortest, fastest and the accessible route for the chosen class; red = fails the gate.</div>
+    <div><b>3 · Ask why</b>Click a red stretch: width pinch, wire / structure (permanent) or vegetation (prunable).</div>
+    <div><b>4 · Inspect</b>Click any dimmed station for its measured width, clearance, binding object and class.</div>
+  </div>
+  <!-- deploy-shell is the fullscreen element: toolbar + map + cards + legend all ride along. -->
+  <div id="deploy-shell" class="deploy-shell">
+  <div class="map-toolbar">
+    <label>City
+      <select id="city-select"><option value="india">India — overview</option>
+        <option value="bhopal" selected>Bhopal</option>
+        <option value="kerala">Kerala</option><option value="chandigarh">Chandigarh</option></select>
+    </label>
+    <button id="view-toggle">2D / 3D</button>
+    <button id="basemap-toggle">🛰 Satellite</button>
+    <button id="align-toggle" title="Overlay the OSM road mesh and the RTK LiDAR centerlines to check their shift">🧭 OSM ↔ LiDAR</button>
+    <label id="align-path-label" class="is-hidden" title="Show one survey path's LiDAR centerlines against the OSM mesh">Path
+      <select id="align-path-select" disabled></select>
+    </label>
+    <label id="cat-label" class="is-hidden" title="Colour the LiDAR centerline by standards class">Categorize
+      <select id="cat-select" disabled>
+        <option value="off">Off (alignment)</option>
+        <option value="width">Width W0–W4 · WU</option>
+        <option value="clearance">Clearance H0–H3</option>
+        <option value="accessibility">Accessibility A0–A3</option>
+      </select>
+    </label>
+    <button id="refined-toggle" class="is-hidden" title="Overlay the multi-drive FUSED width network (Bhopal): the 8 survey drives conflated into ONE connected single-line graph, edges coloured by W-class from the min-safe fused width. Click an edge for its binding width + redundancy.">🧪 Fused width</button>
+    <button id="route-toggle" title="Click an origin then a destination on the map to route between them, accessibility-aware">🚑 Route</button>
+    <label id="route-class-label" class="is-hidden">Class
+      <select id="route-class-select" disabled>
+        <option value="A1">A1 · ambulance</option>
+        <option value="A2">A2 · fire truck</option>
+        <option value="A3">A3 · aerial appliance</option>
+      </select>
+    </label>
+    <label id="route-gate-label" class="is-hidden" title="Which measured dimension gates the route: the full A-class (width × clearance), width only, or overhead clearance only (wire / structure = permanent, vegetation = prunable)">Gate
+      <select id="route-gate-select" disabled>
+        <option value="accessibility">Accessibility (W × H)</option>
+        <option value="width">Width only</option>
+        <option value="clearance">Clearance only</option>
+      </select>
+    </label>
+    <label id="route-algo-label" class="is-hidden">Algorithm
+      <select id="route-algo-select" disabled>
+        <option value="dijkstra">Dijkstra</option>
+        <option value="astar">A*</option>
+      </select>
+    </label>
+    <button id="route-clear" class="is-hidden">Clear pick</button>
+    <span class="align-legend is-hidden" id="cat-legend" aria-label="Categorization legend"></span>
+    <span class="align-legend is-hidden" id="align-legend" aria-label="Alignment layers">
+      <span id="align-line-legend">
+        <span class="al"><span class="swatch" style="background:#ff3caf"></span>OSM (raw)</span>
+        <span class="al"><span class="swatch" style="background:#ffd400"></span>OSM (aligned)</span>
+        <span class="al"><span class="swatch" style="background:#00e5ff"></span>LiDAR centerline</span>
+        <span class="al"><span class="swatch" style="background:#a7ffeb"></span>Road edge</span>
+      </span>
+      <span class="al"><span class="dot" style="background:#ffb300"></span>T/Y</span>
+      <span class="al"><span class="dot" style="background:#e53935"></span>+</span>
+      <span class="al"><span class="dot" style="background:#8e24aa"></span>X</span>
+      <span class="al"><span class="dot" style="background:#00c853"></span>Rotary</span>
+    </span>
+    <button id="cloud-color-toggle">🎨 Class colors</button>
+    <button id="map-fullscreen" title="Full-screen map (Esc exits)">⛶ Full screen</button>
+  </div>
+  <div class="map-wrap">
+    <div id="cesium-map" class="map-mount"></div>
+    <div id="map-card" class="map-card is-hidden" role="dialog" aria-label="Feature info"></div>
+    <div id="route-card" class="map-card route-card is-hidden" role="dialog" aria-label="Route stats"></div>
+  </div>
+  <div id="class-legend" class="class-legend" aria-label="Point-cloud class legend"></div>
+  </div><!-- /deploy-shell -->
+
+  <h3 style="margin-top:1.6rem">Standards behind the colours</h3>
+  <table class="std">
+    <thead><tr><th>Class</th><th>Range / rule</th><th>Basis</th><th>Admits</th></tr></thead>
+    <tbody>
+      <tr><td><span class="sw" style="background:#e0584a"></span>W0 sub-access</td><td>&lt; 3.0 m</td><td class="g">below IRC residential-access minimum</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:#e8a33d"></span>W1 access lane</td><td>3.0 – 3.5 m</td><td class="g">IRC:86-2018 residential-access lane</td><td>ambulance</td></tr>
+      <tr><td><span class="sw" style="background:#3fb950"></span>W2 single lane</td><td>3.5 – 5.5 m</td><td class="g">IRC urban / single-lane carriageway</td><td>fire truck, aerial appliance</td></tr>
+      <tr><td><span class="sw" style="background:#2aa6b0"></span>W3 intermediate</td><td>5.5 – 7.0 m</td><td class="g">IRC intermediate lane</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:#58a6ff"></span>W4 two-lane+</td><td>≥ 7.0 m</td><td class="g">IRC two-lane carriageway</td><td>aerial outrigger set-up</td></tr>
+      <tr><td><span class="sw" style="background:#e0584a"></span>H0 sub-vehicle</td><td>&lt; 2.8 m</td><td class="g">below ambulance height</td><td>—</td></tr>
+      <tr><td><span class="sw" style="background:#e8a33d"></span>H1 below cap</td><td>2.8 – 3.8 m</td><td class="g">below the CMVR vehicle-height cap</td><td>ambulance</td></tr>
+      <tr><td><span class="sw" style="background:#2aa6b0"></span>H2 truck band</td><td>3.8 – 5.0 m</td><td class="g">clears CMVR cap, below IRC road minimum</td><td>fire truck</td></tr>
+      <tr><td><span class="sw" style="background:#3fb950"></span>H3 IRC clear</td><td>≥ 5.0 m</td><td class="g">meets IRC:54 vertical clearance; wires per IRC:32</td><td>aerial appliance</td></tr>
+      <tr><td>A0 / A1 / A2 / A3</td><td>A = W × H</td><td class="g">A0 fails either axis; A1 ≥ W1 ∧ ≥ H1; A2 ≥ W2 ∧ ≥ H2; A3 ≥ W2 ∧ H3</td><td>— / ambulance / fire truck / aerial appliance</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ============================ 3D SCENES (ids shared with src/main.ts) ============================ -->
+<section id="viewer" class="prose wide band" style="max-width:none;padding-left:0;padding-right:0">
+  <div class="prose wide" style="padding-top:0;padding-bottom:0">
+  <h2><span class="kicker">Live · classified 3D scenes</span>The asset classes the register is built from</h2>
+  <p class="muted">Three classified ~30 m segments per city, straight from the pipeline. 🎨 class colours ↔ sensor RGB ·
+    👆 click a point to identify its class · 📏 measure a distance between two points · 🌑 depth shading · ⛶ full screen.
+    Bhopal scenes carry sensor colour; Kerala and Chandigarh are intensity-only surveys.</p>
+  <div id="ply-viewer" class="viewer-mount"></div>
+  <div id="viewer-bar" class="viewer-bar map-toolbar"><!-- toolbar injected by Gallery.ts --></div>
+  <div id="viewer-legend" class="class-legend"><!-- per-scene classes injected by Gallery.ts --></div>
+  <div id="scene-gallery" class="gallery gallery-cities"><!-- city cards injected by Gallery.ts --></div>
+  </div>
+</section>
+
+<!-- ============================ CORRIDOR AUDIT (validate.html embedded) ============================ -->
+<section id="audit" class="prose wide">
+  <h2><span class="kicker">Live · corridor audit</span>Every number, traceable to the points it came from</h2>
+  <p class="muted">The audit viewer walks one survey path at a time through the measurement chain: ① carriageway boundary →
+    centreline → junctions → width at every station, ② overhead clearance per stream (wire / structure / vegetation) with
+    the fitted wire spans and the critical stations, ③ the fused per-vehicle verdict. Hand-digitised ground truth (boundary
+    polygons, junction labels) can be overlaid on the validation paths, and the <i>Deployment</i> panel reruns the same
+    chain on model-predicted labels instead of hand labels, which is how the pipeline behaves on a new corridor.</p>
+  <div class="embed-wrap" id="audit-embed">
+    <div class="embed-bar"><span>Corridor audit viewer · dark UI · best on a laptop or larger screen</span>
+      <a href="validate.html" target="_blank" rel="noopener">Open in its own tab ↗</a></div>
+    <div class="embed-ph" role="button" tabindex="0"><button type="button">Load the corridor audit viewer</button></div>
+  </div>
+</section>
+
+<!-- ============================ DEPLOYMENT READINESS ============================ -->
+<section id="deploy" class="band">
+  <div class="prose wide">
+  <h2><span class="kicker">Deployment readiness</span>From a Rodic survey to a decision layer</h2>
+  <p class="lead">The pipeline needs no new field work. Input is the LiDAR a survey has already produced; output is a set of
+    standard GIS layers and this web application, deployable on the road owner's own infrastructure.</p>
+  <div class="arch">
+    <div><b>1 · Ingest</b>LAS/LAZ + trajectory (any MLS platform: handheld, vehicle, dual-scanner). Tiling, ground filter, corridor extraction.</div>
+    <div><b>2 · Segment</b>Point Transformer V3 foundation encoder (Sonata / Concerto / Utonia), merged across cities so the model travels and the data stays.</div>
+    <div><b>3 · Measure</b>Boundary → centreline → junctions → width per station; wire / structure / vegetation clearance; binding object; multi-drive fusion.</div>
+    <div><b>4 · Certify</b>IRC / CMVR tiers (W, H, A), per-vehicle passability code, transfer to the OSM graph, accessibility-gated routing.</div>
+    <div><b>5 · Deliver</b>GeoJSON / GeoPackage layers, 3D Tiles, this static web app (no server), PDF audit, REST endpoint on request.</div>
+  </div>
+  <div class="two">
+    <div>
+      <h3>Runs where the data is</h3>
+      <ul class="list-tight">
+        <li><b>On-premise or cloud.</b> Batch pipeline in Python / PyTorch on one NVIDIA A100 / L40S-class GPU; geometry steps are CPU-only. The delivery layer is static files served by any web server or object store.</li>
+        <li><b>Data sovereignty by design.</b> Cross-city deployment is done by <i>model merging</i>: fine-tuned encoders are combined in weight space, so raw scans never leave the owner. Consistent with the Geospatial Data Guidelines 2021.</li>
+        <li><b>No personal data in the product.</b> LiDAR-only outputs are geometry and class. Any imagery used in development is face- and number-plate-blurred before it is shown; person points carry no colour.</li>
+        <li><b>Human in the loop.</b> Every flag carries the measured evidence and a class; a compliance verdict is signed off by an engineer in the audit viewer before it leaves.</li>
+        <li><b>Integration.</b> Outputs load directly into QGIS / ArcGIS / PostGIS and Rodic's monitoring dashboards; segment ids map to any asset schema via a mapping table.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Per-station record (as served on this page)</h3>
+      <pre class="schema">{
+  "type": "Feature",
+  "geometry": { "type": "LineString", "coordinates": [...] },   <span class="c">// EPSG:32643, 5–10 m station</span>
+  "properties": {
+    "path": "Bhopal_1",       <span class="c">// survey drive / path id</span>
+    "wm": 6.99,               <span class="c">// measured clear width, m</span>
+    "w": 4,                   <span class="c">// width class W0–W4 (5 = WU, one-sided)</span>
+    "hm": 3.94,               <span class="c">// binding vertical clearance, m (null = open sky)</span>
+    "h": 2,                   <span class="c">// clearance class H0–H3</span>
+    "a": 2,                   <span class="c">// accessibility class A0–A3 (4 = AU)</span>
+    "bind": "Wire",           <span class="c">// binding object class (62-category taxonomy)</span>
+    "bstream": "wire"         <span class="c">// wire | structure | vegetation</span>
+  }
+}</pre>
+      <p class="kpi-note">Plus: junction points with type and radius, the fused multi-drive width graph, and the routing graph with a 3-bit block code per edge (width / wire-structure / vegetation) per vehicle class.</p>
+    </div>
+  </div>
+  <div class="honest">
+    <h3>What is live, what is next, what we do not claim</h3>
+    <ul>
+      <li><b>Live on this page:</b> segmentation, width, clearance, binding object, junctions, standards classes, per-vehicle passability, network transfer and routing on Bhopal, Kerala and Chandigarh; validation against hand-digitised ground truth.</li>
+      <li><b>Next (PoC window on a Rodic corridor):</b> run the chain on a Rodic-supplied LAS/LAZ sample (Mumbai twin or an OPRMC stretch), map our 12/62-class taxonomy to Rodic's asset schema, and export the per-object asset register (class, position, height, offset) as a GeoPackage alongside the station layers shown here.</li>
+      <li><b>Not claimed:</b> road gradient / slope (not a pipeline step today); survey-free operation from street-view imagery (a pilot: road is recovered well, thin wires are not, so it signals re-survey rather than certifies); any result on data we have not processed.</li>
+    </ul>
+  </div>
+  </div>
+</section>
+
+<!-- ============================ EVIDENCE ============================ -->
+<section id="evidence" class="prose wide">
+  <h2><span class="kicker">Evidence</span>Testing, documentation and the people behind it</h2>
+  <div class="ev-grid">
+    <div class="ev"><h3>Testing report</h3><p>Segmentation accuracy per city and model, cross-city transfer and merging, geometric validation against hand-digitised ground truth (boundary IoU, width error, junction detection), accessibility shares, routing results, runtime, and the behaviour on model-predicted labels.</p><a class="btn-s" href="report.html">Open the testing report ↗</a></div>
+    <div class="ev"><h3>Documentation</h3><p>Approach, technical implementation stage by stage, tools, libraries and APIs with licences, data sources, privacy and data-protection compliance, deployment options, and the plan for a Rodic corridor.</p><a class="btn-s" href="docs.html">Open the documentation ↗</a></div>
+    <div class="ev"><h3>Video walkthrough (under 5 min)</h3><p>Business problem, potential impact, the method, this PoC application, validation results and deliverables — narrated in English and in Hindi, same pictures. Unlisted YouTube links, no sign-in needed.</p><a class="btn-s" href="https://youtu.be/2_Fz2nl3AH0" target="_blank" rel="noopener">▶ English ↗</a> <a class="btn-s" href="https://youtu.be/MhNOUmDSMTQ" target="_blank" rel="noopener">▶ हिन्दी ↗</a></div>
+    <div class="ev"><h3>Datasets behind the models</h3><p>Three Indian mobile-LiDAR surveys, manually labelled point by point in a common 12-class taxonomy (Bhopal in 62 categories): handheld MLS in Bhopal's old city (2023), vehicle MLS in semi-urban Kerala and planned Chandigarh (2020). Densities 1,800–2,800 pts/m².</p><a class="btn-s" href="docs.html#data">Data description ↗</a></div>
+  </div>
+  <h3 style="margin-top:1.6rem">Team</h3>
+  <div class="team">
+    <div><b>Pyare Lal</b><span>Director &amp; SPOC, Netrica.AI · PhD scholar, GeoAI4Cities Lab, IISER Bhopal · 3D vision for urban systems, mobile-LiDAR datasets (Ke-MLS, BhopalMLS), domain adaptation</span></div>
+    <div><b>Prachi Chachondhia</b><span>Director, Netrica.AI · PhD scholar (GeoAI), IISER Bhopal · street-view imagery and perception-based urban analysis · 1st prize, DST Geo Innovation Challenge 2024</span></div>
+    <div><b>Dr. Vaibhav Kumar</b><span>Scientific Advisor · Assistant Professor and head, GeoAI4Cities Lab, IISER Bhopal (PhD IIT Bombay) · PI, DST project on emergency-vehicle accessibility from LiDAR</span></div>
+  </div>
+</section>
+
+<footer class="poc-footer">
+  <div class="in">
+    <div><b>Netrica.AI Private Limited</b> · CIN U72100MP2026PTC082091 · DPIIT DIPP268522 · IICE, IISER Bhopal, Bhopal 462066 ·
+      <a href="https://netrica.co.in/">netrica.co.in</a> · netrica.ai@gmail.com</div>
+    <div>Research partner: GeoAI4Cities Laboratory, IISER Bhopal · Proof of concept for the Rodic InfraAI Innovation Challenge 2026 · <span id="build-stamp" data-build="2026-10-08 12:59 IST">build 2026-10-08 12:59 IST</span></div>
+  </div>
+</footer>
+
+</body>
+</html>

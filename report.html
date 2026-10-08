@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <link rel="stylesheet" href="cesium/Widgets/widgets.css">
+  <script src="cesium/Cesium.js"></script>
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Netrica Road Intelligence — PoC Testing Report</title>
+<meta name="description" content="Testing report for the Netrica.AI Road Intelligence proof of concept (Rodic InfraAI Innovation Challenge 2026): segmentation accuracy, cross-city transfer, geometric validation against hand-digitised ground truth, accessibility and routing results, runtime and limitations." />
+<meta name="robots" content="noindex, nofollow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..700&family=Instrument+Sans:ital,wght@0,400..700;1,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" />
+<style>
+  :root { --fg:#101a2e; --muted:#5f6a85; --bg:#fff; --alt:#f7f8fc; --deep:#eef0f8; --accent:#4f46e5; --tint:#e6e6fb;
+          --border:rgba(16,26,46,.14); --safe:#0e9f6e; --warn:#d97706; --bad:#e02d3c;
+          --display:'Bricolage Grotesque','Instrument Sans',system-ui,sans-serif; --body:'Instrument Sans',system-ui,sans-serif; --mono:'Spline Sans Mono',ui-monospace,monospace; }
+  * { box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body { margin:0; font:16px/1.55 var(--body); color:var(--fg); background:var(--bg); }
+  a { color:var(--accent); text-decoration:none; } a:hover { text-decoration:underline; }
+  .top { position:sticky; top:0; z-index:5; background:rgba(255,255,255,.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--border); }
+  .top .in { max-width:1040px; margin:0 auto; padding:.55rem 1.25rem; display:flex; align-items:center; gap:.8rem; font-size:.9rem; }
+  .top b { font-family:var(--display); }
+  .top .sp { flex:1; }
+  .top a.btn { border:1px solid var(--border); border-radius:8px; padding:.35rem .65rem; color:var(--fg); font-weight:600; font-size:.84rem; }
+  .top a.btn:hover { border-color:var(--accent); color:var(--accent); text-decoration:none; }
+  main { max-width:1040px; margin:0 auto; padding:2.2rem 1.25rem 4rem; }
+  .kicker { font:600 .72rem/1.2 var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--accent); }
+  h1 { font:700 clamp(1.8rem,3vw,2.5rem)/1.1 var(--display); letter-spacing:-.01em; margin:.4rem 0 .6rem; }
+  h2 { font:700 1.45rem/1.2 var(--display); margin:2.4rem 0 .6rem; padding-top:1.2rem; border-top:1px solid var(--border); }
+  h3 { font:600 1.05rem/1.3 var(--display); margin:1.4rem 0 .4rem; }
+  p, li { max-width:78ch; }
+  .meta { color:var(--muted); font-size:.92rem; }
+  .meta b { color:var(--fg); }
+  .lead { font-size:1.08rem; }
+  table { border-collapse:collapse; width:100%; font-size:.9rem; margin:.7rem 0 .4rem; background:#fff; }
+  th, td { padding:.42rem .6rem; border-bottom:1px solid var(--border); text-align:left; vertical-align:top; }
+  th { background:var(--deep); font-size:.76rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); font-weight:600; }
+  td.n, th.n { text-align:right; font-variant-numeric:tabular-nums; }
+  td.b { font-weight:700; }
+  tr.sum td { background:var(--alt); font-weight:600; }
+  .cap { font-size:.84rem; color:var(--muted); margin:0 0 1rem; max-width:none; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:.8rem; margin:1rem 0; }
+  .tile { border:1px solid var(--border); border-radius:12px; padding:.9rem 1rem; background:#fff; }
+  .tile .v { font:700 1.8rem/1 var(--display); letter-spacing:-.02em; }
+  .tile .v small { font:500 .85rem var(--body); color:var(--muted); margin-left:.25rem; }
+  .tile .k { color:var(--muted); font-size:.84rem; margin-top:.35rem; }
+  .note { border-left:4px solid var(--accent); background:var(--alt); padding:.7rem 1rem; border-radius:8px; margin:1rem 0; font-size:.93rem; }
+  .warn { border-left-color:var(--warn); }
+  .ok { color:var(--safe); font-weight:600; } .no { color:var(--bad); font-weight:600; }
+  code { font-family:var(--mono); font-size:.86em; background:var(--deep); padding:.05em .3em; border-radius:4px; }
+  .toc { columns:2; column-gap:2rem; font-size:.92rem; margin:1rem 0 0; padding-left:1.2rem; }
+  .toc li { margin:.15rem 0; break-inside:avoid; }
+  footer { border-top:1px solid var(--border); margin-top:3rem; padding-top:1rem; color:var(--muted); font-size:.86rem; }
+  @media print {
+    .top { display:none; } main { padding:0; max-width:none; } h2 { break-after:avoid; } table { break-inside:avoid; page-break-inside:avoid; }
+    body { font-size:11.5px; } .tile .v { font-size:1.4rem; }
+    @page { margin:16mm 14mm; }
+  }
+</style>
+</head>
+<body>
+<div class="top"><div class="in"><b>Netrica.AI</b><span>Road Intelligence · PoC testing report</span><span class="sp"></span>
+  <a class="btn" href="index.html">← Live PoC app</a><a class="btn" href="docs.html">Documentation</a><a class="btn" href="javascript:window.print()">Print / PDF</a></div></div>
+<main>
+  <span class="kicker">Rodic InfraAI Innovation Challenge 2026 · AI for Roads, Bridges &amp; Tunnels · Team Netrica AI</span>
+  <h1>PoC Testing Report: automated corridor geometry, standards flags and vehicle passability from mobile LiDAR</h1>
+  <p class="meta"><b>Netrica.AI Private Limited</b> with the GeoAI4Cities Laboratory, IISER Bhopal · Report version 1.0 · 4 October 2026 ·
+    SPOC Pyare Lal · netrica.ai@gmail.com · Live application: <a href="index.html">this site</a> (static, no backend).</p>
+
+  <p class="lead">This report states what was tested, on which data, against which ground truth, and with what result, for every
+    component that runs in the proof of concept. All figures come from the same pipeline and the same three Indian
+    mobile-LiDAR surveys that the live application serves; the per-path numbers can be re-derived in the application's
+    corridor-audit viewer, and the city-level shares are recomputed in the browser on the PoC home page.</p>
+
+  <ol class="toc">
+    <li><a href="#s1">Summary of results</a></li><li><a href="#s2">Test data and ground truth</a></li>
+    <li><a href="#s3">Semantic segmentation accuracy</a></li><li><a href="#s4">Cross-city transfer and model merging</a></li>
+    <li><a href="#s5">Geometric validation (boundary, width, junctions)</a></li><li><a href="#s6">Behaviour on model-predicted labels</a></li>
+    <li><a href="#s7">Width, clearance and accessibility results</a></li><li><a href="#s8">Accessibility-gated routing</a></li>
+    <li><a href="#s9">Runtime, footprint and the delivered application</a></li><li><a href="#s10">Street-view imagery pilot (not certified)</a></li>
+    <li><a href="#s11">Limitations and failure modes</a></li><li><a href="#s12">Reproducibility and traceability</a></li>
+  </ol>
+
+  <h2 id="s1">1 · Summary of results</h2>
+  <div class="grid">
+    <div class="tile"><div class="v">0.10<small>m</small></div><div class="k">Width mean absolute error vs hand-traced boundary, main spine (n = 3,982 stations); 0.19 m on branches (n = 243)</div></div>
+    <div class="tile"><div class="v">0.969</div><div class="k">Carriageway boundary IoU vs 13 hand-traced polygons (main spine); 0.947 on branches</div></div>
+    <div class="tile"><div class="v">0.80 / 0.85</div><div class="k">Junction completeness / correctness vs 215 hand-labelled junctions; type agreement 86%</div></div>
+    <div class="tile"><div class="v">67–80<small>mIoU</small></div><div class="k">12-class segmentation after fine-tuning, per city (Bhopal 71.3, Kerala 67.6, Chandigarh 79.9); overall accuracy 92–96%</div></div>
+    <div class="tile"><div class="v">≤ 5<small>mIoU</small></div><div class="k">Cost of deploying one merged encoder per city instead of city-specific fine-tuning, without sharing raw scans (naive transfer loses up to 38)</div></div>
+    <div class="tile"><div class="v">&lt; 3<small>ms</small></div><div class="k">Accessibility-gated route (A*) on a 1,364-node city graph, computed in the browser</div></div>
+  </div>
+  <table>
+    <thead><tr><th>Component</th><th>Test</th><th>Ground truth / reference</th><th>Result</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>Semantic segmentation</td><td>Held-out test paths, 12 classes, three cities, three PTv3 encoders</td><td>Manual point-wise labels</td><td>mIoU 66.7–79.9 fine-tuned; dominant classes 83–98% IoU; Wire 83–88%</td><td class="ok">Pass</td></tr>
+      <tr><td>Cross-city deployment</td><td>Merged encoder per city vs city fine-tune</td><td>Same test splits</td><td>Within 5 mIoU everywhere (Utonia: −0.6 / +1.8 / +0.2)</td><td class="ok">Pass</td></tr>
+      <tr><td>Carriageway boundary</td><td>13 traced polygons, 8 road-geometry types</td><td>Hand-digitised polygons on the MLS reference</td><td>IoU 0.969 main spine, 0.947 branches</td><td class="ok">Pass</td></tr>
+      <tr><td>Width per station</td><td>4,225 stations across three sites</td><td>Width from the traced polygons</td><td>MAE 0.10 m (spine), 0.19 m (branch); conservative bias</td><td class="ok">Pass</td></tr>
+      <tr><td>Junction detection</td><td>215 junctions, all 8 Bhopal drives + Kerala + Chandigarh paths</td><td>Hand-labelled points with types</td><td>Completeness 0.80, correctness 0.85, quality 0.70, type 0.86</td><td class="ok">Pass (over-detects on ring topologies)</td></tr>
+      <tr><td>Overhead clearance</td><td>Wire spans fitted per station stream</td><td>Fit residual gate</td><td>Quadratic per span, RMSE ≤ 0.25 m accepted; stations with no overhead evidence reported, never assumed clear</td><td class="ok">Pass</td></tr>
+      <tr><td>Deployed run on predicted labels</td><td>Bhopal drives 7 and 8, three encoders</td><td>Hand-labelled run of the same drives</td><td>Main-spine width error 0.58–1.00 m; branches 1.09–1.40 m → only the main spine is certified</td><td class="ok">Pass with scope rule</td></tr>
+      <tr><td>Routing engine</td><td>60 origin–destination pairs per city, A* vs Dijkstra vs SSSP</td><td>Exact shortest-path distances</td><td>Identical distances (A* within 0.5 m graph resolution); 0.25–2.5 ms per query</td><td class="ok">Pass</td></tr>
+      <tr><td>Street-view uplift (pilot)</td><td>76 annotated crops</td><td>Manual masks</td><td>Road 92.7–92.8% IoU, Wire 25.6–37.8%</td><td class="no">Not certified · in development</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="s2">2 · Test data and ground truth</h2>
+  <p>Three mobile-laser-scanning (MLS) surveys of contrasting Indian urban forms, each manually labelled point by point and
+    represented in a common 12-class taxonomy (ground, vegetation, building, road, wire, pole/tower, wire–structure connector,
+    vehicle, board, fencing, human/animal, road-side object). Bhopal's labels follow a 62-category static taxonomy mapped
+    hierarchically to the 12 classes. Train / validation / test splits are by complete survey paths, so test paths are spatially
+    separate from training paths.</p>
+  <table>
+    <thead><tr><th>Site</th><th>Urban form</th><th>Platform &amp; scanner</th><th>Year</th><th class="n">Density (pts/m²)</th><th>Colour</th><th class="n">Routable main spine</th><th class="n">Stations in the app</th></tr></thead>
+    <tbody>
+      <tr><td>Bhopal (BM)</td><td>Dense historic core, bazaar lanes, low wiring</td><td>Handheld GeoSLAM ZEB Horizon (Velodyne VLP-16 + 360° camera), DGPS georeferenced; 8 drives</td><td>Mar 2023</td><td class="n">2,829</td><td>RGB on 35–40% of points</td><td class="n">10.6 km</td><td class="n">2,427</td></tr>
+      <tr><td>Kerala (KM)</td><td>Semi-urban, vegetated, narrow village lanes</td><td>Vehicle-mounted Riegl VQ-450</td><td>2020</td><td class="n">1,787</td><td>intensity only</td><td class="n">8.1 km</td><td class="n">1,727</td></tr>
+      <tr><td>Chandigarh (CH)</td><td>Planned grid, wide avenues, mature tree canopy</td><td>Vehicle-mounted StreetMapper, dual Riegl VQ-450 + GNSS/IMU (Geokno, for Chandigarh Administration)</td><td>2020</td><td class="n">2,224</td><td>intensity only</td><td class="n">17.2 km</td><td class="n">4,054</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">Densities under a common 5 m tile / 25 cm voxel protocol (mean point spacing 4.9 / 4.9 / 4.0 cm). "Stations in the app" = measured 5–10 m
+    carriageway stations in the layers served by the live application (main spine and branches).</p>
+  <h3>Ground truth used for validation</h3>
+  <ul>
+    <li><b>Semantic labels:</b> manual point-wise annotation of every survey (Bhopal in 62 categories; Kerala's labels ship with the dataset; Chandigarh follows the Kerala annotation and quality-control protocol).</li>
+    <li><b>Carriageway polygons:</b> 13 hand-traced polygons over the MLS reference across the three sites, covering eight road-geometry classes: simple corridor, organic loop, dense street network, four-arm roundabout, junction, straight segment, 90° corner, divided dual carriageway.</li>
+    <li><b>Junctions:</b> 215 hand-labelled junction points with type (142 three-way T/Y, 56 four-way, plus skew and ring cases) spanning all eight Bhopal drives and the traced Kerala and Chandigarh paths.</li>
+    <li><b>Per-station checks:</b> hand-measured ground truth on stratified stations is used to check the thresholds behind the standards tiers.</li>
+  </ul>
+
+  <h2 id="s3">3 · Semantic segmentation accuracy</h2>
+  <p>Three Point Transformer V3 foundation encoders (Sonata, Concerto, Utonia) were evaluated under three protocols: linear probe
+    (frozen encoder, linear head), decoder probe (frozen encoder, trained decoder) and full fine-tuning. Input is a 9-channel
+    representation (coordinates, colour where present, intensity, normals), native resolution, test-time augmentation.
+    The table reports the fine-tuning protocol used in deployment.</p>
+  <table>
+    <thead><tr><th>Model (fine-tuned, 12 classes)</th><th class="n">Params (M)</th><th class="n">Bhopal OA</th><th class="n">Bhopal mIoU</th><th class="n">Chandigarh OA</th><th class="n">Chandigarh mIoU</th><th class="n">Kerala OA</th><th class="n">Kerala mIoU</th></tr></thead>
+    <tbody>
+      <tr><td>Sonata</td><td class="n">124.8</td><td class="n">92.12</td><td class="n">68.72</td><td class="n">95.89</td><td class="n">79.60</td><td class="n">93.87</td><td class="n">67.52</td></tr>
+      <tr><td>Concerto</td><td class="n">224.2</td><td class="n">93.42</td><td class="n">71.06</td><td class="n">95.80</td><td class="n b">79.92</td><td class="n">92.40</td><td class="n b">67.58</td></tr>
+      <tr><td>Utonia</td><td class="n">162.2</td><td class="n">92.69</td><td class="n b">71.28</td><td class="n">96.36</td><td class="n">79.76</td><td class="n">92.82</td><td class="n">66.66</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">OA = overall accuracy, mIoU = mean intersection over union over the 12 classes, both in %. Linear and decoder probes score 55.7–77.1 mIoU and are not deployed.</p>
+  <p><b>Per-class behaviour.</b> The classes the corridor measurement depends on are segmented reliably everywhere under fine-tuning:
+    Vegetation 96–98% IoU, Building 83–97%, Road 86–93%, and Wire 83–88% despite being a thin structure. The hardest classes are the rare,
+    city-dependent ones: Wire–Structure Connector reaches 79–85% in Bhopal (dense overhead wiring) but is absent from Chandigarh and sparse
+    in Kerala (24–49%); Road-Side Object is near zero in Kerala. These near-empty classes pull Kerala's mean below Bhopal's although its
+    scenes are visually simpler.</p>
+
+  <h2 id="s4">4 · Cross-city transfer and model merging</h2>
+  <p>A model fine-tuned on one city transfers poorly to another: the best single-source model into Bhopal reaches 43.4 mIoU against the
+    in-city 71.3 (a loss of up to 38 points across pairs). The deployment mechanism is therefore <b>multi-city model merging</b>: fine-tuned
+    encoders are combined in weight space into one encoder per target city, and each city's own segmentation head is re-attached. Raw scans
+    are never pooled, so the method works where data cannot be shared between owners.</p>
+  <table>
+    <thead><tr><th>Encoder</th><th class="n">Bhopal merged</th><th class="n">Bhopal FT</th><th class="n">Δ</th><th class="n">Kerala merged</th><th class="n">Kerala FT</th><th class="n">Δ</th><th class="n">Chandigarh merged</th><th class="n">Chandigarh FT</th><th class="n">Δ</th></tr></thead>
+    <tbody>
+      <tr><td>Sonata</td><td class="n">65.03</td><td class="n">68.72</td><td class="n">−3.69</td><td class="n">68.55</td><td class="n">67.37</td><td class="n b">+1.18</td><td class="n">79.46</td><td class="n">79.50</td><td class="n">−0.04</td></tr>
+      <tr><td>Concerto</td><td class="n">68.74</td><td class="n">68.10</td><td class="n b">+0.64</td><td class="n">66.63</td><td class="n">63.57</td><td class="n b">+3.06</td><td class="n">78.61</td><td class="n">78.88</td><td class="n">−0.27</td></tr>
+      <tr><td>Utonia (deployed)</td><td class="n">70.66</td><td class="n">71.28</td><td class="n">−0.62</td><td class="n">68.14</td><td class="n">66.35</td><td class="n b">+1.79</td><td class="n">79.84</td><td class="n">79.66</td><td class="n b">+0.18</td></tr>
+      <tr><td>Utonia, one universal encoder</td><td class="n">61.21</td><td class="n">71.28</td><td class="n">−10.07</td><td class="n">68.04</td><td class="n">66.35</td><td class="n">+1.69</td><td class="n">78.61</td><td class="n">79.66</td><td class="n">−1.05</td></tr>
+      <tr><td>Utonia, pooled-data joint (reference)</td><td class="n">69.80</td><td class="n">71.28</td><td class="n">−1.48</td><td class="n">75.73</td><td class="n">66.35</td><td class="n">+9.38</td><td class="n">80.62</td><td class="n">79.66</td><td class="n">+0.96</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">mIoU (%) on each city's held-out test split. FT = within-city fine-tuning. Merged = per-city merged encoder. The universal row ships one encoder
+    unchanged to all three cities; the joint row pools raw data (strong for the smallest city, but requires centralised scans and a full retrain per added city).</p>
+  <div class="note"><b>What this means for a Rodic corridor.</b> A new city gets a merged encoder built from the existing fine-tunes plus a small in-city
+    fine-tune when labels exist; no partner data has to leave its premises to benefit from the three-city training base. The expected cost of merging
+    is bounded here at about 5 mIoU against a full in-city fine-tune.</div>
+
+  <h2 id="s5">5 · Geometric validation</h2>
+  <p>The width chain (carriageway boundary → centreline → junctions → width per station) was validated against hand-digitised ground truth on
+    three fronts, with main spine and branches reported separately because the system certifies only the main spine (section 6).</p>
+  <table>
+    <thead><tr><th>Path</th><th class="n">Boundary IoU</th><th class="n">Width MAE (m)</th><th class="n">GT junctions</th><th class="n">TP</th><th class="n">FP</th><th class="n">Missed</th><th class="n">Type acc.</th></tr></thead>
+    <tbody>
+      <tr><td>Bhopal 1 (dense organic network)</td><td class="n">0.965</td><td class="n">0.18</td><td class="n">26</td><td class="n">17</td><td class="n">8</td><td class="n">9</td><td class="n">0.76</td></tr>
+      <tr><td>Bhopal 2</td><td class="n">0.971</td><td class="n">0.12</td><td class="n">32</td><td class="n">29</td><td class="n">1</td><td class="n">3</td><td class="n">0.97</td></tr>
+      <tr><td>Bhopal 7</td><td class="n">0.975</td><td class="n">0.13</td><td class="n">20</td><td class="n">15</td><td class="n">3</td><td class="n">5</td><td class="n">0.87</td></tr>
+      <tr><td>Bhopal 8</td><td class="n">0.919</td><td class="n">0.17</td><td class="n">17</td><td class="n">17</td><td class="n">5</td><td class="n">0</td><td class="n">0.88</td></tr>
+      <tr><td>B3S1 · B3S2 · B3S3 (Bhopal short corridors)</td><td class="n">0.978 · 0.955 · 0.961</td><td class="n">0.14 · 0.18 · 0.14</td><td class="n">4 · 3 · 9</td><td class="n">3 · 1 · 4</td><td class="n">0 · 0 · 0</td><td class="n">1 · 2 · 5</td><td class="n">1.00 · 0.00 · 0.50</td></tr>
+      <tr><td>Kerala 1 · 2 · 3 · 4</td><td class="n">0.980 · 0.986 · 0.986 · 0.979</td><td class="n">0.07 · 0.05 · 0.05 · 0.07</td><td class="n">0 · 0 · 1 · 1</td><td class="n">— · — · 1 · 1</td><td class="n">0</td><td class="n">0</td><td class="n">1.00</td></tr>
+      <tr><td>Chandigarh 1 (divided dual carriageway) · 2</td><td class="n">0.967 · 0.973</td><td class="n">0.20 · 0.13</td><td class="n">12 · 0</td><td class="n">12 · —</td><td class="n">5 · 1</td><td class="n">0 · —</td><td class="n">0.92 · —</td></tr>
+      <tr><td>Bhopal 3 · 4 · 5 · 6 (junction GT only)</td><td class="n">—</td><td class="n">—</td><td class="n">23 · 22 · 34 · 11</td><td class="n">16 · 15 · 30 · 10</td><td class="n">0 · 5 · 2 · 0</td><td class="n">7 · 7 · 4 · 1</td><td class="n">0.75 · 0.80 · 0.93 · 0.80</td></tr>
+      <tr class="sum"><td>Main spine</td><td class="n">0.969</td><td class="n">0.10 (n = 3,982)</td><td colspan="5"></td></tr>
+      <tr class="sum"><td>Branches</td><td class="n">0.947</td><td class="n">0.19 (n = 243)</td><td colspan="5"></td></tr>
+      <tr class="sum"><td>All junctions</td><td></td><td></td><td class="n">215</td><td class="n">171</td><td class="n">30</td><td class="n">44</td><td class="n">0.86</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">Junction matching is one-to-one within 8 m. Completeness 0.80, correctness 0.85, quality 0.70. An earlier evaluation restricted to the thirteen traced paths
+    (125 junctions) gave 0.80 / 0.81 / 0.68 and type 0.87, so the detector's accuracy is stable across validation-set size.</p>
+  <ul>
+    <li><b>Width error is conservative.</b> The recovered carriageway is marginally narrower than truth, so certification errors understate rather than overstate access. The 0.10 m spine error sits well inside the ≥ 0.5 m gaps between vehicle-class thresholds (3.0 / 3.5 / 5.5 / 7.0 m).</li>
+    <li><b>Denoising was tested and rejected.</b> Three outlier filters (statistical, density/off-surface, detachment guard) scored against the traced polygons on nine paths improved no path by more than a millimetre and worsened width error on the five denser paths by factors of 1.05–2.7; clouds are therefore measured raw, at full resolution.</li>
+    <li><b>Junction detector choice.</b> On a 79-junction subset the training-free geometric detector (orientation-field defects) scores quality 0.671 against 0.548 for a detector on learned 3D features, with correctness 0.905 against 0.785; the geometric detector is the one deployed.</li>
+    <li><b>Residual junction error</b> is dominated by over-detection on ring topologies (four-arm roundabout, organic old-city loop). Both failure modes fail safe: a spurious junction disc masks only a short stretch, and a missed junction can only widen, never narrow, the measured carriageway.</li>
+  </ul>
+
+  <h2 id="s6">6 · Behaviour on model-predicted labels (deployed condition)</h2>
+  <p>Everything above uses hand labels. A new corridor will be measured on <i>predicted</i> labels, so the full chain was rerun on the two held-out
+    Bhopal drives (7 and 8) with three encoders (12-class fine-tune, 21-class fine-tune, merged) and compared with the hand-labelled run of the same drives.
+    The per-path shares below are the ones shown in the application's corridor-audit <i>Deployment</i> panel.</p>
+  <table>
+    <thead><tr><th>Drive · labels</th><th class="n">Length (m)</th><th class="n">Min width (m)</th><th class="n">Median width (m)</th><th class="n">Ambulance can use</th><th class="n">Fire truck can use</th><th class="n">Aerial can use</th></tr></thead>
+    <tbody>
+      <tr class="sum"><td>Bhopal 7 · hand labels</td><td class="n">1,314</td><td class="n">1.97</td><td class="n">4.68</td><td class="n">78.7%</td><td class="n">53.2%</td><td class="n">41.2%</td></tr>
+      <tr><td>Bhopal 7 · predicted, 12-class encoder</td><td class="n">1,357</td><td class="n">0.80</td><td class="n">4.04</td><td class="n">81.8%</td><td class="n">49.5%</td><td class="n">37.6%</td></tr>
+      <tr><td>Bhopal 7 · predicted, 21-class encoder</td><td class="n">1,360</td><td class="n">1.19</td><td class="n">4.38</td><td class="n">80.9%</td><td class="n">54.1%</td><td class="n">40.7%</td></tr>
+      <tr><td>Bhopal 7 · predicted, merged encoder</td><td class="n">1,376</td><td class="n">1.60</td><td class="n">4.03</td><td class="n">79.5%</td><td class="n">46.8%</td><td class="n">33.6%</td></tr>
+      <tr class="sum"><td>Bhopal 8 · hand labels</td><td class="n">930</td><td class="n">1.07</td><td class="n">4.05</td><td class="n">67.1%</td><td class="n">29.6%</td><td class="n">20.0%</td></tr>
+      <tr><td>Bhopal 8 · predicted, 12-class encoder</td><td class="n">936</td><td class="n">0.98</td><td class="n">3.65</td><td class="n">63.3%</td><td class="n">28.9%</td><td class="n">20.0%</td></tr>
+      <tr><td>Bhopal 8 · predicted, 21-class encoder</td><td class="n">935</td><td class="n">1.10</td><td class="n">3.99</td><td class="n">67.5%</td><td class="n">29.0%</td><td class="n">20.0%</td></tr>
+      <tr><td>Bhopal 8 · predicted, merged encoder</td><td class="n">995</td><td class="n">1.09</td><td class="n">3.37</td><td class="n">56.4%</td><td class="n">26.7%</td><td class="n">20.4%</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">Shares are of measured station length passable to each vehicle on that drive (per-vehicle width and clearance thresholds), as computed by the pipeline and listed in the
+    application's validation manifest. Hand-label rows are the reference.</p>
+  <p><b>Width error under predicted labels.</b> Pooled over the two drives, main-spine width error is 0.78, 0.58 and 1.00 m for the 12-class, 21-class and merged
+    encoders, and branch error 1.18, 1.09 and 1.40 m (over 3 m on the branch-sparse drive 7). Branch error is comparable to the gaps between vehicle-class thresholds.
+    <b>Policy adopted:</b> only the main spine is certified; side-street stubs seen one-sidedly are reported as width-uncertain (WU / AU) and excluded from accessible-length
+    denominators and from routing. This rule is applied identically in the live application.</p>
+  <p><b>Choosing an encoder for accessibility, not just mIoU.</b> Across twelve encoder variants the one with the highest mIoU (71.3%) ranked only ninth on accessibility
+    fidelity (mean absolute error of the five accessibility-class shares against the hand-label run: 3.5 pp), while the encoders that track the hand-label accessibility map
+    best are not the mIoU leaders. The deployed configuration is selected on accessibility fidelity.</p>
+
+  <h2 id="s7">7 · Width, clearance and accessibility results</h2>
+  <table>
+    <thead><tr><th>City</th><th class="n">Avg. width (m)</th><th class="n">Stations &lt; 3.0 m wide</th><th class="n">Overhead object present</th><th class="n">Clearance &lt; 4.5 m</th><th class="n">Clearance &lt; 3.5 m</th></tr></thead>
+    <tbody>
+      <tr><td>Bhopal</td><td class="n">4.9</td><td class="n">7.5%</td><td class="n">88.9%</td><td class="n">56.3%</td><td class="n">24.6%</td></tr>
+      <tr><td>Kerala</td><td class="n">4.7</td><td class="n">9.1%</td><td class="n">69.4%</td><td class="n">21.0%</td><td class="n">1.3%</td></tr>
+      <tr><td>Chandigarh</td><td class="n">8.2</td><td class="n">4.7%</td><td class="n">62.1%</td><td class="n">37.7%</td><td class="n">12.1%</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">All measured carriageway stations, main spine and branches, hand-labelled clouds. Clearance = lowest of the wire, structure and vegetation streams over the drivable band.</p>
+  <table>
+    <thead><tr><th>City (routable main spine)</th><th class="n">Ambulance (3.0 / 3.5 m)</th><th class="n">Fire truck (3.5 / 4.5 m)</th><th class="n">Aerial appliance (3.5 / 5.0 m)</th><th>Binding object at obstructed stations</th></tr></thead>
+    <tbody>
+      <tr><td>Bhopal · 10.6 km</td><td class="n">72.9%</td><td class="n">40.1%</td><td class="n">27.9%</td><td>Wire at 79% (low bazaar wiring; shop shades, boards)</td></tr>
+      <tr><td>Kerala · 8.1 km</td><td class="n">90.9%</td><td class="n">64.4%</td><td class="n">54.2%</td><td>Mixed: utility wires and tree canopy</td></tr>
+      <tr><td>Chandigarh · 17.2 km</td><td class="n">85.0%</td><td class="n">58.3%</td><td class="n">53.4%</td><td>High vegetation at 84% (avenue-tree canopy over the drive lane)</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">Share of certifiable road length accessible to each vehicle class (width / clearance thresholds in the column heads).</p>
+  <p><b>Which axis blocks each vehicle.</b> For the large apparatus the overhead axis blocks more road than the width axis at every site: among stations failing on one axis only,
+    overhead exceeds width for the fire truck (64.9 vs 5.2% of blocked stations in Bhopal; 45.4 vs 40.9 in Kerala; 87.2 vs 7.1 in Chandigarh) and by a wider margin for the aerial
+    appliance (70.9 vs 2.8; 57.4 vs 25.0; 88.6 vs 5.7). The ambulance is the exception in Kerala, where narrow village lanes (width) dominate. A wide planned carriageway therefore does
+    not by itself guarantee vertical clearance: Chandigarh's aerial-appliance share (53.4%) equals Kerala's (54.2%) despite carriageways nearly twice as wide.</p>
+  <div class="note"><b>Live recomputation.</b> The PoC home page recomputes length-weighted A-class shares, overhead presence and the binding object from the served station layers
+    (all measured stations, including branches, with WU reported separately). Those shares therefore differ slightly in scope from the main-spine table above; both are correct for their scope.</div>
+
+  <h2 id="s8">8 · Accessibility-gated routing</h2>
+  <p>Emergency response was simulated over facility → incident pairs on the aligned OSM mesh carrying the per-edge codes: origins are the OSM hospitals and fire stations nearest each
+    surveyed area (23 / 11 / 44), destinations 30 incident points per city on surveyed streets. Each edge is gated on the minimum width and clearance along it. Unsurveyed road is treated as
+    passable, so detours are lower bounds, and the share of each gated route on unsurveyed road is reported.</p>
+  <table>
+    <thead><tr><th>City</th><th>Vehicle</th><th class="n">Incidents unreachable</th><th class="n">No route (of serviceable pairs)</th><th class="n">Rerouted</th><th class="n">Median detour</th><th class="n">Median delay (min)</th><th class="n">Route on unsurveyed road</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="3">Bhopal</td><td>Ambulance</td><td class="n">53.3%</td><td class="n">11.0%</td><td class="n">57.1%</td><td class="n">27.7%</td><td class="n">0.72</td><td class="n">66.5%</td></tr>
+      <tr><td>Fire truck</td><td class="n">66.7%</td><td class="n">70.6%</td><td class="n">14.7%</td><td class="n">8.9%</td><td class="n">0.29</td><td class="n">100%</td></tr>
+      <tr><td>Aerial appliance</td><td class="n">70.0%</td><td class="n">75.4%</td><td class="n">11.5%</td><td class="n">8.5%</td><td class="n">0.32</td><td class="n">100%</td></tr>
+      <tr><td rowspan="3">Kerala</td><td>Ambulance</td><td class="n">23.3%</td><td class="n">36.1%</td><td class="n">46.2%</td><td class="n">26.5%</td><td class="n">3.11</td><td class="n">86.9%</td></tr>
+      <tr><td>Fire truck</td><td class="n">43.3%</td><td class="n">64.0%</td><td class="n">21.1%</td><td class="n">12.3%</td><td class="n">1.95</td><td class="n">100%</td></tr>
+      <tr><td>Aerial appliance</td><td class="n">43.3%</td><td class="n">64.0%</td><td class="n">21.1%</td><td class="n">12.3%</td><td class="n">1.95</td><td class="n">100%</td></tr>
+      <tr><td rowspan="3">Chandigarh</td><td>Ambulance</td><td class="n">16.7%</td><td class="n">65.5%</td><td class="n">18.2%</td><td class="n">23.6%</td><td class="n">2.83</td><td class="n">100%</td></tr>
+      <tr><td>Fire truck</td><td class="n">23.3%</td><td class="n">73.3%</td><td class="n">11.3%</td><td class="n">24.5%</td><td class="n">1.19</td><td class="n">100%</td></tr>
+      <tr><td>Aerial appliance</td><td class="n">23.3%</td><td class="n">73.3%</td><td class="n">11.3%</td><td class="n">24.5%</td><td class="n">1.19</td><td class="n">100%</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">Survey coverage of the routing mesh: Bhopal 69.3% (one traversable corridor, 15.2 km), Kerala 29.6% (2 components, 16.4 km), Chandigarh 19.4% (16 components, 28.3 km).
+    The worst Bhopal ambulance dispatch runs 589 m unrestricted but 2.49 km once gated (+323%, about 3.5 min).</p>
+  <table>
+    <thead><tr><th>City graph</th><th class="n">Nodes</th><th class="n">Edges</th><th class="n">A* (ms)</th><th class="n">A* nodes expanded</th><th class="n">Dijkstra (ms)</th><th class="n">Dijkstra nodes expanded</th></tr></thead>
+    <tbody>
+      <tr><td>Bhopal</td><td class="n">252</td><td class="n">718</td><td class="n">0.25</td><td class="n">43</td><td class="n">0.39</td><td class="n">118</td></tr>
+      <tr><td>Kerala</td><td class="n">239</td><td class="n">550</td><td class="n">0.27</td><td class="n">54</td><td class="n">0.35</td><td class="n">123</td></tr>
+      <tr><td>Chandigarh</td><td class="n">1,364</td><td class="n">3,842</td><td class="n">1.49</td><td class="n">252</td><td class="n">2.47</td><td class="n">691</td></tr>
+    </tbody>
+  </table>
+  <p class="cap">60 origin–destination pairs per city. SSSP distances are identical to Dijkstra's and A* agrees within the 0.5 m graph resolution. The live application runs the same
+    Dijkstra / A* in the browser (no server round trip) and reports nodes expanded per query in its route card.</p>
+
+  <h2 id="s9">9 · Runtime, footprint and the delivered application</h2>
+  <ul>
+    <li><b>Delivery:</b> a static web application (HTML, TypeScript compiled to JavaScript, CesiumJS 3D Tiles, three.js point clouds, GeoJSON layers). No backend, no database, no cookies; hostable on any static host or object store, including on-premise.</li>
+    <li><b>Payload:</b> under 1 GB for the three-city PoC including classified point clouds, 3D Tiles, network layers, routing graphs and validation geometry; individual files under 25 MB; heavy assets load lazily as a section scrolls into view.</li>
+    <li><b>Browser requirements:</b> a WebGL 2 browser (Chrome, Edge, Firefox, Safari 16+); the audit viewer is designed for laptop or larger screens.</li>
+    <li><b>Batch pipeline:</b> Python / PyTorch; segmentation on one NVIDIA A100 / L40S-class GPU; geometry, standards and routing steps CPU-only. Merged inference costs the same as a single model.</li>
+    <li><b>Throughput on a Rodic corridor</b> will be measured during the PoC run and reported with the corridor results; the application's acceptance target is end-to-end processing under one hour per 10 km on a single GPU.</li>
+  </ul>
+
+  <h2 id="s10">10 · Street-view imagery pilot (not certified)</h2>
+  <p>A pilot tested whether street-view crops can be lifted to metric 3D and segmented with the same encoders, as a cheap signal for <i>change</i> between LiDAR surveys.
+    On 76 annotated crops the road surface is recovered well (92.7–92.8% IoU) but Wire collapses to 25.6–37.8% against 83–88% on LiDAR. Because wire sets the clearance that gates
+    the largest vehicles, this path cannot certify geometry. <b>It is excluded from the PoC's certified outputs</b> and is positioned only as a trigger for re-survey.</p>
+
+  <h2 id="s11">11 · Limitations and failure modes</h2>
+  <ul>
+    <li><b>Scope of certification.</b> Only the routable main spine is certified; side-street stubs with one-sided evidence are reported as uncertain and never routed.</li>
+    <li><b>Survey coverage bounds routing claims.</b> Where a survey covers a small fraction of the mesh (Chandigarh 19%), gated routes run largely on unsurveyed road; detour figures are lower bounds.</li>
+    <li><b>Thin-structure accuracy.</b> Wire is the accuracy-critical class at 83–88% IoU; a dedicated power-line extraction stream is the natural upgrade.</li>
+    <li><b>Transient objects.</b> Parked vehicles narrow the measured carriageway at capture time; the ground-cause attribution names them and repeat drives reconcile them, but a single drive reports the street as it was that day.</li>
+    <li><b>Ring topologies</b> (roundabouts, old-city loops) produce extra junction detections; accepted because the failure is safe by construction.</li>
+    <li><b>Not implemented:</b> road gradient / slope; instance-level asset register export in the browser (scheduled for the Rodic corridor run as a GeoPackage deliverable).</li>
+  </ul>
+
+  <h2 id="s12">12 · Reproducibility and traceability</h2>
+  <ul>
+    <li><b>Per-path numbers</b> (boundary, width per station, clearance per stream, junctions, verdicts) can be inspected in the application's corridor-audit viewer; ground-truth polygons and junction labels overlay on the validation paths.</li>
+    <li><b>City-level shares</b> are recomputed in the browser from the served station layers (<code>data/network/&lt;city&gt;_categorization.geojson</code>, EPSG:32643) on the PoC home page.</li>
+    <li><b>Routing</b> is executed live over the served graphs (<code>data/network/&lt;city&gt;_graph.json</code>); the route card reports lengths, detour and nodes expanded for each query.</li>
+    <li><b>Peer review.</b> The methodology and the tables in sections 3–8 are from a manuscript by the team currently under review at a leading photogrammetry and remote-sensing journal; numbers here follow the manuscript revision of 29 September 2026.</li>
+    <li><b>Data availability for evaluators.</b> The three surveys are research datasets of IISER Bhopal and partners (Bhopal: own capture; Kerala: published dataset; Chandigarh: Chandigarh Administration survey processed under agreement); the served layers are derived products and carry no personal data. Access to source clouds can be arranged for the jury under the owners' terms.</li>
+  </ul>
+
+  <footer>Netrica.AI Private Limited · CIN U72100MP2026PTC082091 · DPIIT DIPP268522 · IICE, IISER Bhopal, Bhopal 462066 · netrica.co.in · netrica.ai@gmail.com ·
+    Research partner: GeoAI4Cities Laboratory, IISER Bhopal. Prepared for the Rodic InfraAI Innovation Challenge 2026 Proof-of-Concept round.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,110 @@
+[
+  {
+    "id": 0,
+    "name": "Ground",
+    "color": [
+      128,
+      128,
+      128
+    ]
+  },
+  {
+    "id": 1,
+    "name": "Vegetation",
+    "color": [
+      0,
+      128,
+      0
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Building",
+    "color": [
+      128,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 3,
+    "name": "Road",
+    "color": [
+      64,
+      64,
+      64
+    ]
+  },
+  {
+    "id": 4,
+    "name": "Wire",
+    "color": [
+      255,
+      255,
+      0
+    ]
+  },
+  {
+    "id": 5,
+    "name": "Pole and Tower",
+    "color": [
+      255,
+      0,
+      255
+    ]
+  },
+  {
+    "id": 6,
+    "name": "Wire-Structure Connector",
+    "color": [
+      255,
+      128,
+      0
+    ]
+  },
+  {
+    "id": 7,
+    "name": "Vehicle",
+    "color": [
+      0,
+      0,
+      255
+    ]
+  },
+  {
+    "id": 8,
+    "name": "Board",
+    "color": [
+      0,
+      255,
+      255
+    ]
+  },
+  {
+    "id": 9,
+    "name": "Fencing",
+    "color": [
+      128,
+      0,
+      128
+    ]
+  },
+  {
+    "id": 10,
+    "name": "Human and Animal",
+    "color": [
+      255,
+      0,
+      0
+    ]
+  },
+  {
+    "id": 11,
+    "name": "Road Side Object",
+    "color": [
+      0,
+      128,
+      128
+    ]
+  }
+]

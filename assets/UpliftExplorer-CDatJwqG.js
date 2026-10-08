@@ -1,0 +1,60 @@
+import{a as C}from"./asset-DvAnIZL7.js";import{PlyViewer as re}from"./PlyViewer-DQccMwi8.js";import"./OrbitControls-B2MD5Xj6.js";function F(t,o){const g=document.createElement("option");return g.value=t,g.textContent=o,g}async function ue(t){let o;try{const e=await fetch(C("uplift/manifest.json"));if(!e.ok)throw new Error(`HTTP ${e.status}`);o=await e.json()}catch(e){console.warn("uplift manifest unavailable",e),t.innerHTML=`<div class="uplift-empty">
+      Interactive artifacts have not been exported on this deployment yet.<br>
+      <code>scripts/b3_direct_uplift/06_export_web.py</code> creates the data-driven manifest.
+    </div>`;return}if(!o.samples.length){t.innerHTML='<div class="uplift-empty">No uplift samples in the manifest.</div>';return}t.innerHTML=`
+    <div class="uplift-overview">
+      <div class="uplift-pipeline" aria-label="Uplift processing stages">
+        <div class="uplift-pipeline-step"><span>01</span><b data-role="pipe-input">Direct multi-view crops</b><small>90° source views</small></div>
+        <i aria-hidden="true">→</i>
+        <div class="uplift-pipeline-step"><span>02</span><b data-role="pipe-mask">SAM3 sky removal</b><small data-role="pipe-mask-detail">per crop</small></div>
+        <i aria-hidden="true">→</i>
+        <div class="uplift-pipeline-step"><span>03</span><b data-role="pipe-geometry">Metric 3D</b><small>shared refined centre</small></div>
+        <i aria-hidden="true">→</i>
+        <div class="uplift-pipeline-step"><span>04</span><b data-role="pipe-segmentation">Utonia segmentation</b><small data-role="pipe-model"></small></div>
+      </div>
+      <div class="uplift-assurance">
+        <span class="uplift-badge" data-role="panorama-badge"></span>
+        <span class="uplift-badge subtle" data-role="view-count"></span>
+        <span class="uplift-badge cvat" data-role="cvat-badge" hidden></span>
+        <span class="uplift-badge diagnostic" data-role="diagnostic-badge" hidden></span>
+      </div>
+    </div>
+    <div class="uplift-toolbar">
+      <label>Location <select data-role="sample"></select></label>
+      <label>Pose + depth <select data-role="arm"></select></label>
+      <label>Segmentation <select data-role="model"></select></label>
+      <button data-role="color" aria-pressed="true">🎨 Class colors</button>
+      <label>Point size <input data-role="size" type="range" min="0.6" max="4" step="0.2" value="1.6"></label>
+      <button data-role="reset">⟲ Reset</button>
+      <button data-role="fullscreen">⛶ Full screen</button>
+    </div>
+    <div class="uplift-stage">
+      <div class="uplift-input-panel">
+        <div class="uplift-panel-head"><span data-role="input-heading">Direct input crop</span><b data-role="slot-label"></b></div>
+        <div class="uplift-input-media">
+          <img data-role="input-image" alt="Selected direct street-view crop">
+          <div class="uplift-mosaic" data-role="input-mosaic" aria-label="All direct input crops" hidden></div>
+        </div>
+        <div class="uplift-view-strip" data-role="views" aria-label="Input views"></div>
+        <p class="uplift-input-note" data-role="input-note"></p>
+      </div>
+      <div class="uplift-output-panel">
+        <div class="uplift-panel-head"><span data-role="output-heading">Per-crop metric uplift</span><b data-role="cloud-label"></b></div>
+        <div class="viewer-mount uplift-viewer" data-role="viewer"></div>
+        <div class="class-legend uplift-legend" data-role="legend"></div>
+      </div>
+    </div>
+    <div class="uplift-stats" aria-label="Selected artifact statistics">
+      <div><span>Sky removed</span><b data-role="stat-sky">—</b></div>
+      <div><span>Geometry retained</span><b data-role="stat-valid">—</b></div>
+      <div><span>Labeled points</span><b data-role="stat-points">—</b></div>
+      <div><span>Inference voxels</span><b data-role="stat-voxels">—</b></div>
+    </div>
+    <div class="uplift-evaluation" data-role="evaluation" hidden>
+      <div class="uplift-eval-head">
+        <div><span>CVAT evaluation · annotated main crop only</span><small data-role="eval-scope"></small></div>
+        <strong><span>mIoU</span><b data-role="eval-miou">—</b></strong>
+      </div>
+      <div class="uplift-eval-grid" data-role="eval-grid"></div>
+    </div>
+    <p class="uplift-method-note" data-role="method-note"></p>`;const g=t.querySelector('[data-role="sample"]'),u=t.querySelector('[data-role="arm"]'),c=t.querySelector('[data-role="model"]'),E=t.querySelector('[data-role="color"]'),$=t.querySelector('[data-role="size"]'),U=t.querySelector('[data-role="reset"]'),O=t.querySelector('[data-role="fullscreen"]'),_=t.querySelector('[data-role="views"]'),L=t.querySelector('[data-role="input-image"]'),M=t.querySelector('[data-role="input-mosaic"]'),R=t.querySelector('[data-role="input-heading"]'),W=t.querySelector('[data-role="output-heading"]'),H=t.querySelector('[data-role="input-note"]'),J=t.querySelector('[data-role="slot-label"]'),K=t.querySelector('[data-role="cloud-label"]'),Q=t.querySelector('[data-role="method-note"]'),k=t.querySelector('[data-role="legend"]'),X=t.querySelector('[data-role="viewer"]'),m=new re(X,"contain"),P=t.querySelector('[data-role="panorama-badge"]'),Y=t.querySelector('[data-role="view-count"]'),V=t.querySelector('[data-role="cvat-badge"]'),B=t.querySelector('[data-role="diagnostic-badge"]'),Z=t.querySelector('[data-role="pipe-model"]'),j=t.querySelector('[data-role="stat-sky"]'),z=t.querySelector('[data-role="stat-valid"]'),ee=t.querySelector('[data-role="stat-points"]'),te=t.querySelector('[data-role="stat-voxels"]'),ae=t.querySelector('[data-role="evaluation"]'),le=t.querySelector('[data-role="eval-scope"]'),ne=t.querySelector('[data-role="eval-miou"]'),G=t.querySelector('[data-role="eval-grid"]'),S=o.pipeline;S&&(t.querySelector('[data-role="pipe-input"]').textContent=S.input,t.querySelector('[data-role="pipe-mask"]').textContent=S.masking,t.querySelector('[data-role="pipe-geometry"]').textContent=S.geometry,t.querySelector('[data-role="pipe-segmentation"]').textContent=S.segmentation),P.textContent=o.panorama_used?"⚠ Panorama-derived input":"✓ No panorama used",P.classList.toggle("warning",o.panorama_used),o.samples.forEach((e,a)=>{g.appendChild(F(String(a),`${e.scene} · ${e.id}`))});let v=o.samples[0],p=v.views[0]?.slot??"main",w=0;const b=()=>v.arms[u.value],h=()=>b().models[c.value],D=()=>{const e=u.value;u.innerHTML="",Object.keys(v.arms).forEach(a=>u.appendChild(F(a,o.arms[a]??a))),e&&v.arms[e]&&(u.value=e)},T=()=>{const e=c.value;c.innerHTML="",Object.keys(b().models).forEach(a=>c.appendChild(F(a,o.models[a]?.name??a))),e&&b().models[e]&&(c.value=e)},A=()=>{const e=h().views;return v.views.filter(a=>!!e[a.slot])},oe=()=>[...A().map(e=>e.slot),...h().fused?["fused"]:[]],se=e=>{const a=o.models[c.value],n=Object.values(e.class_histogram).reduce((l,r)=>l+r,0);k.innerHTML="",a.palette.forEach(l=>{const r=e.class_histogram[String(l.id)]??0;if(!r)return;const i=document.createElement("span");i.className="cl",i.title=`${r.toLocaleString()} points`;const f=document.createElement("span");f.className="swatch",f.style.background=`rgb(${l.color.join(",")})`,i.append(f,`${l.name} ${n?(100*r/n).toFixed(0):0}%`),k.appendChild(i)})},ie=()=>{const e=h().evaluation;if(ae.hidden=!e,G.innerHTML="",!e)return;const a=e.native;ne.textContent=a.miou_gt_present==null?"N/A":`${(100*a.miou_gt_present).toFixed(1)}%`,le.textContent=`${e.native_space} native taxonomy · ${e.n_evaluated_locations} location${e.n_evaluated_locations===1?"":"s"} · ${e.n_evaluated_points.toLocaleString()} labeled points · ${a.n_gt_present_classes} GT-present classes`;const n=o.models[c.value].palette;a.per_class.forEach(l=>{const r=document.createElement("div");r.className=l.gt_points?"uplift-eval-class":"uplift-eval-class no-gt";const i=document.createElement("span"),f=document.createElement("i"),s=n.find(x=>x.id===l.id)?.color??[128,128,128];f.style.background=`rgb(${s.join(",")})`,i.append(f,l.name);const d=document.createElement("b");d.textContent=l.gt_points&&l.iou!=null?`${(100*l.iou).toFixed(1)}%`:"N/A";const y=document.createElement("small");y.textContent=l.gt_points?`${l.gt_points.toLocaleString()} GT pts`:"no GT support",r.append(i,d,y),G.appendChild(r)})},q=async e=>{const a=A(),n=e==="fused"&&!!h().fused,l=a.find(s=>s.slot===e)??a[0];if(!n&&!l)return;const r=++w;p=n?"fused":l.slot;const i=n?h().fused:h().views[p];if(L.hidden=n,M.hidden=!n,R.textContent=n?"Direct multi-view inputs":"Direct input crop",W.textContent=n?"Fused multi-view metric uplift":"Per-crop metric uplift",n?(M.innerHTML="",a.forEach(s=>{const d=document.createElement("img");d.src=C(s.image),d.alt=`${s.slot.replace("_"," ")} direct crop`,d.title=s.slot.replace("_"," "),M.appendChild(d)})):(L.src=C(l.image),L.alt=`${v.id} ${p} direct crop`),J.textContent=n?`${a.length} crops`:p.replace("_"," "),K.textContent=`${o.models[c.value].name} · ${i.n_points.toLocaleString()} points`,n){const s=a.reduce((y,x)=>y+x.sky_fraction,0)/Math.max(a.length,1),d=a.reduce((y,x)=>y+x.valid_fraction,0)/Math.max(a.length,1);H.textContent=`${a.length} direct crops fused in one local metric frame; SAM3 runs independently on every crop.`,j.textContent=`${(100*s).toFixed(0)}% mean`,z.textContent=`${(100*d).toFixed(0)}% mean`}else H.textContent="SAM3 removes sky before this crop is uplifted and semantically labeled.",j.textContent=`${(100*l.sky_fraction).toFixed(0)}%`,z.textContent=`${(100*l.valid_fraction).toFixed(0)}%`;ee.textContent=i.n_points.toLocaleString(),te.textContent=i.n_voxels.toLocaleString();const f=b().cvat_main_mask_applied?" · verified CVAT mask on main crop":"";Q.textContent=`${o.arms[u.value]??u.value} · shared refined optical centre${f} · local z-up metric frame · UTM origin ${v.origin_utm.map(s=>s.toFixed(1)).join(", ")}`,Y.textContent=`${a.length} direct crop${a.length===1?"":"s"}`,V.hidden=!u.value.endsWith("_cvat"),V.textContent=b().cvat_main_mask_applied?"✓ CVAT mask verified":"CVAT variant",B.hidden=!b().diagnostic_only,B.textContent=b().diagnostic_only?"Diagnostic · MoGe-2-scaled relative geometry":"",Z.textContent=o.models[c.value].name,m.setPalette(o.models[c.value].palette),t.setAttribute("aria-busy","true");try{if(await m.load(C(i.ply)),r!==w)return;m.setPointSize(Number($.value)),se(i),ie()}catch(s){console.error("uplift cloud unavailable",i.ply,s),r===w&&(k.textContent="This point-cloud artifact could not be loaded.")}finally{r===w&&t.setAttribute("aria-busy","false")}_.querySelectorAll("button").forEach(s=>{const d=s.dataset.slot===p;s.classList.toggle("active",d),s.setAttribute("aria-pressed",String(d))})},I=()=>{if(_.innerHTML="",A().forEach(e=>{const a=document.createElement("button");a.type="button",a.dataset.slot=e.slot,a.setAttribute("aria-pressed","false");const n=document.createElement("img");n.src=C(e.image),n.alt="";const l=document.createElement("span");l.textContent=e.slot.replace("_"," "),a.append(n,l),a.addEventListener("click",()=>void q(e.slot)),_.appendChild(a)}),h().fused){const e=document.createElement("button");e.type="button",e.dataset.slot="fused",e.className="uplift-fused-choice",e.setAttribute("aria-pressed","false");const a=document.createElement("strong");a.textContent="⊞",a.setAttribute("aria-hidden","true");const n=document.createElement("span");n.textContent="fused",e.append(a,n),e.addEventListener("click",()=>void q("fused")),_.appendChild(e)}},N=()=>{I();const e=oe();e.includes(p)||(p=e[0]??"main"),q(p)};g.addEventListener("change",()=>{v=o.samples[Number(g.value)],p=v.views[0]?.slot??"main",D(),T(),N()}),u.addEventListener("change",()=>{T(),N()}),c.addEventListener("change",N),E.addEventListener("click",()=>{const e=m.getColorMode()==="class"?"rgb":"class";m.setColorMode(e),E.textContent=e==="class"?"🎨 Class colors":"📷 Sensor RGB",E.setAttribute("aria-pressed",String(e==="class"))}),$.addEventListener("input",()=>m.setPointSize(Number($.value))),U.addEventListener("click",()=>m.resetView()),O.addEventListener("click",()=>m.toggleFullscreen()),D(),T(),I(),await q(p)}export{ue as mountUpliftExplorer};

@@ -1,0 +1,21 @@
+{
+  "asset": {
+    "version": "1.0"
+  },
+  "geometricError": 233.26116424971391,
+  "root": {
+    "boundingVolume": {
+      "sphere": [
+        1278633.9442378161,
+        5722216.6819169875,
+        2503109.407216986,
+        233.26116424971391
+      ]
+    },
+    "geometricError": 0,
+    "refine": "ADD",
+    "content": {
+      "uri": "points.pnts"
+    }
+  }
+}

@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="stylesheet" href="cesium/Widgets/widgets.css">
+  <script src="cesium/Cesium.js"></script>
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Accessibility viewer — per-path validation</title>
+  <style>
+    /* ============ Accessibility viewer — dark UI =========================
+       Three stage accents:  ① width = blue · ② clearance = gold · ③ accessibility = green */
+    :root { --bg:#0b0d12; --panel:#12151d; --card:#0d1117; --fg:#e6edf3; --muted:#8b98a8;
+            --border:#242b38; --green:#3fb950; --gold:#d4a017; --red:#e0584a; --blue:#58a6ff;
+            --w-acc:#58a6ff; --c-acc:#d4a017; --a-acc:#3fb950; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; height:100%; font-family:Inter,-apple-system,Segoe UI,Roboto,sans-serif;
+                background:var(--bg); color:var(--fg); }
+    #app { display:grid; grid-template-columns:348px 1fr; height:100vh; }
+    aside { background:var(--panel); border-right:1px solid var(--border); padding:16px 16px 24px;
+            overflow-y:auto; scrollbar-width:thin; }
+
+    /* ---- header ---- */
+    .brand { display:flex; align-items:center; gap:10px; }
+    .brand .mark { display:flex; gap:3px; }
+    .brand .mark i { width:9px; height:22px; border-radius:3px; }
+    .brand .mark i:nth-child(1) { background:var(--w-acc); }
+    .brand .mark i:nth-child(2) { background:var(--c-acc); height:16px; margin-top:3px; }
+    .brand .mark i:nth-child(3) { background:var(--a-acc); height:11px; margin-top:6px; }
+    h1 { font-size:1.12rem; margin:0; letter-spacing:.01em; }
+    .sub { color:var(--muted); font-size:.78rem; margin:6px 0 14px; line-height:1.45; }
+
+    /* ---- generic controls ---- */
+    select, button, input[type=range] { font-family:inherit; }
+    select, button { width:100%; background:var(--card); color:var(--fg); border:1px solid var(--border);
+                     border-radius:8px; padding:8px 10px; font-size:.88rem; }
+    button { cursor:pointer; transition:border-color .12s, background .12s; }
+    button:hover { border-color:#3d4757; }
+    button.active { background:#1f6feb; color:#fff; border-color:#1f6feb; }
+    label.fld { display:block; font-size:.7rem; text-transform:uppercase; letter-spacing:.05em;
+                color:var(--muted); margin:14px 0 5px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:10px;
+            padding:12px 13px; margin-top:12px; }
+    .card h3 { font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 8px; }
+    .hint { color:var(--muted); font-size:.76rem; line-height:1.5; margin-top:4px; }
+    .muted { color:var(--muted); }
+    table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    td { padding:3px 0; } td.r { text-align:right; font-variant-numeric:tabular-nums; }
+    kbd { background:var(--card); border:1px solid var(--border); border-bottom-width:2px; border-radius:4px;
+          padding:0 5px; font-size:.74rem; font-family:inherit; color:var(--fg); }
+
+    /* ---- city pills + path row ---- */
+    .city-pills { display:flex; gap:6px; margin-bottom:8px; }
+    .city-pills button { flex:1; padding:7px 4px; font-size:.8rem; font-weight:600;
+                         border-radius:8px; display:flex; align-items:center; justify-content:center; gap:6px; }
+    .city-pills .dot { width:8px; height:8px; border-radius:50%; background:var(--cc); flex:none; }
+    .city-pills .n { color:var(--muted); font-weight:400; font-size:.72rem; }
+    .city-pills button.active { background:color-mix(in srgb, var(--cc) 16%, var(--card)); border-color:var(--cc); }
+    .path-row { display:flex; gap:6px; }
+    .path-row select { flex:1; min-width:0; }
+    .path-row button { width:38px; flex:none; padding:8px 0; font-size:.9rem; }
+    .badge-row { display:flex; align-items:center; gap:8px; margin-top:8px; }
+    .verdict { display:inline-block; font-size:.72rem; font-weight:700; padding:2px 9px; border-radius:999px; flex:none; }
+    .v-false { background:#3d1518; color:#ff8b80; } .v-real { background:#11331f; color:#5ee08a; }
+    .v-part { background:#3a2e10; color:#f0c14b; }
+
+    /* ---- stage tabs ---- */
+    .stages { display:flex; gap:6px; margin:16px 0 0; }
+    .stages button { flex:1; padding:8px 4px 7px; font-size:.78rem; font-weight:600; line-height:1.25;
+                     border-radius:9px; border-bottom:3px solid transparent; color:var(--muted); }
+    .stages button .st-no { display:block; font-size:1rem; }
+    .stages button .st-state { display:block; font-size:.62rem; font-weight:600; letter-spacing:.03em;
+                               text-transform:uppercase; margin-top:2px; }
+    .stages button[data-stage=width]     { --sc:var(--w-acc); }
+    .stages button[data-stage=clearance] { --sc:var(--c-acc); }
+    .stages button[data-stage=access]    { --sc:var(--a-acc); }
+    .stages button.active { color:var(--fg); border-color:var(--sc);
+                            background:color-mix(in srgb, var(--sc) 12%, var(--card)); }
+    .stages .st-state.done { color:var(--green); } .stages .st-state.next { color:var(--gold); }
+    .stages .st-state.plan { color:var(--muted); }
+    .stage-panel { display:none; }
+    .stage-panel.active { display:block; }
+    .stage-head { display:flex; align-items:center; gap:8px; margin:12px 0 2px; }
+    .stage-head h2 { font-size:.95rem; margin:0; }
+    .chip { font-size:.64rem; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+            padding:2px 8px; border-radius:999px; flex:none; }
+    .chip.done { background:#11331f; color:#5ee08a; }
+    .chip.next { background:#3a2e10; color:#f0c14b; }
+    .chip.plan { background:#1c2230; color:#8b98a8; }
+
+    /* ---- width walkthrough ---- */
+    .stepper { display:flex; gap:6px; margin-top:10px; }
+    .stepper button { flex:1; padding:7px 4px; font-size:.79rem; }
+    .steps { display:flex; flex-direction:column; gap:5px; margin-top:10px; }
+    .step { text-align:left; font-size:.83rem; padding:7px 10px; position:relative; }
+    .step.active { border-color:#31405a; color:var(--fg); }
+    .step.active::after { content:'✓'; position:absolute; right:9px; color:var(--w-acc); opacity:.8; font-size:.78rem; }
+    .step.cur { border-color:var(--w-acc); box-shadow:inset 3px 0 0 var(--w-acc); font-weight:600; }
+    .step.cur::after { content:''; }
+    .check { font-size:.8rem; color:#cdd6e0; line-height:1.5; margin-top:8px;
+             background:#10202e; border-left:3px solid var(--w-acc); padding:7px 10px; border-radius:0 6px 6px 0; }
+    .check:empty { display:none; }
+    .counts { font-size:.74rem; color:var(--muted); font-variant-numeric:tabular-nums; margin-top:7px; }
+    .subrow { display:flex; gap:5px; margin-top:8px; flex-wrap:wrap; }
+    .subrow .ck { display:inline-flex; align-items:center; gap:4px; font-size:.76rem; color:var(--muted); }
+    .subrow input { accent-color:var(--w-acc); }
+    /* contextual rows nested inside the step list, under their own step */
+    .steps .instep { margin:0 0 2px 10px; padding:4px 0 4px 10px; border-left:2px solid var(--w-acc); }
+    .small { font-size:.72rem; }
+    .wcls { flex:1; padding:6px 3px; font-size:.78rem; font-weight:700; border-bottom:3px solid var(--wc); line-height:1.15; }
+    .wcls.active { background:var(--wc); color:var(--card); border-color:var(--wc); }
+    .wcls:not(.active) { opacity:.32; filter:grayscale(0.6); }
+    .wcls .share { display:block; font-size:.68rem; font-weight:400; opacity:.9; }
+    .wptr { margin:3px 0; font-size:.8rem; }
+    details.chk { font-size:.8rem; color:var(--muted,#7d8a9c); }
+    details.chk > summary { cursor:pointer; opacity:.75; }
+    .wtiers { width:100%; border-collapse:collapse; font-size:.82rem; }
+    .wtiers td { padding:3px 6px; } .wtiers td:nth-child(2) { font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .sw { display:inline-block; width:11px; height:11px; border-radius:3px; margin-right:7px; vertical-align:middle; }
+    .ro { font-size:.82rem; color:var(--muted); line-height:1.5; }
+    .ms-key { display:none; gap:10px; flex-wrap:wrap; font-size:11px; margin-top:6px; }
+
+    /* ---- clearance / access ---- */
+    #stage-clearance .step.cur, #stage-clearance .step.active { border-color:var(--c-acc); box-shadow:inset 3px 0 0 var(--c-acc); }
+    #stage-clearance .step.active::after { content:''; }
+    .mlist { display:flex; flex-direction:column; gap:6px; margin-top:8px; }
+    .mrow { display:flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--border);
+            border-radius:8px; padding:7px 9px; cursor:pointer; font-size:.8rem; }
+    .mrow:hover { border-color:var(--a-acc); }
+    .mrow.active { border-color:var(--a-acc); background:#12251a; }
+    .mrow .dot { width:10px; height:10px; border-radius:50%; flex:none; }
+    .mrow b { font-variant-numeric:tabular-nums; }
+
+    /* ---- legend / tools ---- */
+    .legend { display:flex; flex-direction:column; gap:5px; font-size:.78rem; }
+    .legend span.sw { margin-right:8px; }
+    .big { font-size:1.6rem; font-weight:600; font-variant-numeric:tabular-nums; }
+    .read .big { color:var(--green); }
+    .slider { display:flex; align-items:center; gap:8px; } .slider input { flex:1; }
+    details.panel { border:1px solid var(--border); border-radius:10px; margin-top:12px; background:var(--card); overflow:hidden; }
+    details.panel > summary { cursor:pointer; padding:10px 12px; font-weight:600; font-size:.9rem; list-style:none; }
+    details.panel > summary::-webkit-details-marker { display:none; }
+    details.panel[open] > summary { border-bottom:1px solid var(--border); }
+    details.panel > div, details.panel > table { margin:10px 12px; }
+
+    #viewer { position:relative; }
+    #measure-viewer { position:absolute; inset:0; }
+    /* slim status strip over the 3D view: path · stage · step */
+    #view-status { position:absolute; top:10px; left:12px; z-index:2; font-size:.78rem; color:#cdd6e0;
+                   background:rgba(11,13,18,.78); border:1px solid var(--border); border-radius:8px;
+                   padding:4px 10px; pointer-events:none; max-width:70%; }
+    #view-status b { color:var(--fg); }
+  </style>
+  <script type="module" crossorigin src="./assets/validate-l6lHiD56.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="./assets/OrbitControls-B2MD5Xj6.js">
+</head>
+<body>
+  <div id="app">
+    <aside>
+      <div class="brand">
+        <span class="mark"><i></i><i></i><i></i></span>
+        <h1>Accessibility viewer</h1>
+      </div>
+      <div class="sub">Per-path validation of the LiDAR accessibility pipeline —
+        <b style="color:var(--w-acc)">① carriageway width</b> ·
+        <b style="color:var(--c-acc)">② vertical clearance</b> ·
+        <b style="color:var(--a-acc)">③ accessibility</b>.</div>
+
+      <!-- ---- city + path picker ---- -->
+      <div class="city-pills" id="city-pills">
+        <button data-city="bhopal" style="--cc:#e0584a"><span class="dot"></span>Bhopal <span class="n"></span></button>
+        <button data-city="kerala" style="--cc:#3fb950"><span class="dot"></span>Kerala <span class="n"></span></button>
+        <button data-city="chandigarh" style="--cc:#58a6ff"><span class="dot"></span>Chandigarh <span class="n"></span></button>
+      </div>
+      <div class="path-row">
+        <button id="path-prev" title="previous path ( [ )">◀</button>
+        <select id="path-select"></select>
+        <button id="path-next" title="next path ( ] )">▶</button>
+      </div>
+      <label class="hint" style="display:flex; gap:6px; align-items:center; margin-top:4px; cursor:pointer"
+             title="Include the survey drives without traced boundary GT (Bhopal_3..6) — needed for the GT worklist measuring. Remembered across reloads.">
+        <input id="all-paths-chk" type="checkbox" />
+        show ALL survey drives (GT worklist)</label>
+      <div class="badge-row"><span id="verdict" class="verdict v-false">—</span>
+        <span class="hint" id="dims" style="margin-top:0">—</span></div>
+
+      <!-- ---- the three pipeline stages ---- -->
+      <div class="stages" id="stage-tabs">
+        <button data-stage="width" class="active"><span class="st-no">①</span>Width</button>
+        <button data-stage="clearance"><span class="st-no">②</span>Clearance</button>
+        <button data-stage="access"><span class="st-no">③</span>Accessibility</button>
+      </div>
+
+      <!-- ============ ① CARRIAGEWAY WIDTH ============ -->
+      <div class="stage-panel active" id="stage-width">
+        <div class="stage-head"><h2>Carriageway width</h2></div>
+        <div class="hint">Walk the width pipeline one step at a time and read each step against the
+          <b>✓ check</b>. Click a transect for its width.</div>
+
+        <div class="stepper">
+          <button id="step-clear">✕ Clear</button>
+          <button id="step-prev">◀ Back</button>
+          <button id="step-next">Next ▶</button>
+          <button id="step-last">Last ⇥</button>
+        </div>
+        <div class="hint" id="step-status">View: point cloud only</div>
+
+        <div class="steps" id="width-steps">
+          <button class="step" data-wstep="2">① Road boundary · α-hull</button>
+          <!-- ①③ road-boundary GT overlay (shown at the boundary steps, inline under ①) -->
+          <div class="subrow instep" id="bgt-row" style="display:none">
+            <label class="ck"><input type="checkbox" id="bgtBoundary"> GT boundary</label>
+            <span class="small muted">— — green dashed = hand-drawn road polygon (vs cyan α-hull ① / magenta refinement ③)</span>
+          </div>
+          <button class="step" data-wstep="3">② PCA orientation field</button>
+          <!-- ② field LENS checkboxes (single-select; shown only at step 2, inline under ②) -->
+          <div class="subrow instep" id="field-lens" style="display:none">
+            <label class="ck"><input type="checkbox" class="lens" data-lens="sal" checked> saliency</label>
+            <label class="ck"><input type="checkbox" class="lens" data-lens="ori"> orientation</label>
+            <label class="ck"><input type="checkbox" class="lens" data-lens="jr"> 1−R road</label>
+            <label class="ck"><input type="checkbox" class="lens" data-lens="js"> 1−R small</label>
+            <label class="ck"><input type="checkbox" class="lens" data-lens="ch"> |charge|</label>
+          </div>
+          <button class="step" data-wstep="4">③ Boundary refinement</button>
+          <button class="step" data-wstep="5">④ Junction detection</button>
+          <!-- ④⑤ hand-labelled junction GT overlay (inline under ④, shows through ⑤) -->
+          <div class="subrow instep" id="gt-row" style="display:none">
+            <label class="ck"><input type="checkbox" id="gtJunc"> GT junctions (jtype)</label>
+            <span class="small muted">○ ring = GT · orange T/Y · magenta +/X · grey L</span>
+          </div>
+          <!-- step-contextual legend (junction status ④ / type ⑤), filled by setWStep -->
+          <div class="ms-key instep" id="wlegend"></div>
+          <button class="step" data-wstep="6">⑤ Junction type</button>
+          <button class="step" data-wstep="7">⑥ Centerline</button>
+          <button class="step" data-wstep="8">⑦ Transects</button>
+          <button class="step" data-wstep="9">⑧ Width · measured</button>
+          <button class="step" data-wstep="10">⑨ Categorize · W0–W4</button>
+          <!-- ⑨ per-class toggles — each isolates its W-class (inline under ⑨) -->
+          <div class="subrow instep" id="wclass-row" style="display:none">
+            <button class="wcls active" data-wc="0" style="--wc:#e0584a">W0</button>
+            <button class="wcls active" data-wc="1" style="--wc:#e8a33d">W1</button>
+            <button class="wcls active" data-wc="2" style="--wc:#3fb950">W2</button>
+            <button class="wcls active" data-wc="3" style="--wc:#2aa6b0">W3</button>
+            <button class="wcls active" data-wc="4" style="--wc:#58a6ff">W4</button>
+          </div>
+        </div>
+        <div class="hint" id="width-caption">—</div>
+        <div class="check" id="width-check"></div>
+        <div class="counts" id="width-counts"></div>
+        <div class="ro" id="width-ro" style="margin-top:8px">—</div>
+
+        <!-- IRC width tiers (reference for ⑩) -->
+        <details class="panel" open>
+          <summary>IRC width tiers · W0–W4</summary>
+          <table class="wtiers">
+            <tr><td><span class="sw" style="background:#e0584a"></span><b>W0</b></td><td>&lt; 3.0 m</td><td>—</td><td class="muted">sub-access — below IRC residential-access min</td></tr>
+            <tr><td><span class="sw" style="background:#e8a33d"></span><b>W1</b></td><td>3.0 – 3.5 m</td><td>🚑</td><td class="muted">access-lane (IRC residential)</td></tr>
+            <tr><td><span class="sw" style="background:#3fb950"></span><b>W2</b></td><td>3.5 – 5.5 m</td><td>🚒🪜</td><td class="muted">single-lane (IRC urban)</td></tr>
+            <tr><td><span class="sw" style="background:#2aa6b0"></span><b>W3</b></td><td>5.5 – 7.0 m</td><td>—</td><td class="muted">intermediate lane</td></tr>
+            <tr><td><span class="sw" style="background:#58a6ff"></span><b>W4</b></td><td>≥ 7.0 m</td><td>🏗</td><td class="muted">two-lane+ — aerial (outrigger) setup</td></tr>
+          </table>
+          <div class="hint"><b>Standards-based classification</b> (IRC 86-2018 lane widths); vehicles are
+            <b>named instances</b> on the scale — ambulance → W1, fire &amp; ladder passage → W2,
+            aerial setup → W4 (IFC 2021 D105). Strict IRC compliance = width ≥ <b>W2</b> ∧ clearance <b>H3</b>.</div>
+          <div class="ro" id="std-ro" style="margin-top:8px">—</div>
+        </details>
+
+        <!-- width-stage legend -->
+        <div class="card">
+          <h3>Legend · width layers</h3>
+          <div class="legend">
+            <div><span class="sw" style="background:#aaacb2"></span>road surface</div>
+            <div><span class="sw" style="background:#00d2ff"></span>① road boundary · α-hull</div>
+            <div><span class="sw" style="background:#ff4fd8"></span>③ boundary refinement · smoothed mask</div>
+            <div><span class="sw" style="background:#7d8a9c"></span>⑦ width transect = pipeline width</div>
+          </div>
+        </div>
+
+        <!-- ============ DEPLOYMENT walkthrough (2nd width panel) ============
+             The SAME width pipeline on the segmentation-PREDICTED road (Bhopal 7/8, held-out test),
+             with Step ① outlier removal ON — the detach-guarded denoise the GT A/B reserved for
+             deployment. Its own path chips + ①–⑩ stepper; GT paths stay in the dropdown above. -->
+        <details class="panel" id="deploy-panel">
+          <summary>Deployment · predicted road <span class="small muted">(Bhopal 7 / 8 test set)</span></summary>
+          <div class="hint">
+            The same width pipeline run on the <b>segmentation-predicted</b> road, for a chosen model.
+            The A/B (raw / SOR / SOR+contiguity / detach vs the Bhopal&nbsp;7 boundary GT) showed Step ①
+            shifts reported width by <b>≤6&nbsp;mm</b> (marginally narrow) — <b>width is insensitive to
+            outlier removal</b>, so it is retained only as a visualization / clearance layer, not a width
+            requirement. Held-out test set: <b>Bhopal&nbsp;7</b> and <b>Bhopal&nbsp;8</b>
+            (both with junction + boundary GT).
+          </div>
+          <div class="subrow" style="margin-top:10px">
+            <label class="small muted" for="deploy-model">Model</label>
+            <select id="deploy-model">
+              <option value="">Utonia 12c FT</option>
+              <option value="_21c">Utonia 21c</option>
+              <option value="_merged">Utonia merged (BKC generalist)</option>
+            </select>
+          </div>
+          <div class="city-pills" id="deploy-paths" style="margin-top:10px">
+            <button data-dpath="Bhopal_7" style="--cc:#e0584a"><span class="dot"></span>Bhopal 7</button>
+            <button data-dpath="Bhopal_8" style="--cc:#e0584a"><span class="dot"></span>Bhopal 8</button>
+          </div>
+          <div class="stepper">
+            <button id="dstep-clear">✕ Clear</button>
+            <button id="dstep-prev">◀ Back</button>
+            <button id="dstep-next">Next ▶</button>
+            <button id="dstep-last">Last ⇥</button>
+          </div>
+          <div class="steps" id="deploy-steps">
+            <button class="step" data-dstep="1">① Outlier removal · detach-guarded</button>
+            <div class="subrow instep" id="dofilt-row" style="display:none">
+              <label class="ck"><input type="checkbox" class="ofilt" data-of="sor" checked> <span style="color:#ff2222">■</span> statistical</label>
+              <label class="ck"><input type="checkbox" class="ofilt" data-of="contiguity" checked> <span style="color:#ff9500">■</span> detached streak</label>
+              <label class="ck"><input type="checkbox" class="ofilt" data-of="elevation" checked> <span style="color:#d05ce3">■</span> off-surface (elevation)</label>
+            </div>
+            <button class="step" data-dstep="2">② Road boundary · α-hull</button>
+            <div class="subrow instep" id="dbgt-row" style="display:none">
+              <label class="ck"><input type="checkbox" id="dbgtBoundary"> GT boundary</label>
+              <span class="small muted">— — green dashed = hand-drawn road polygon (vs cyan α-hull)</span>
+            </div>
+            <button class="step" data-dstep="3">③ PCA orientation field</button>
+            <button class="step" data-dstep="4">④ Boundary refinement</button>
+            <button class="step" data-dstep="5">⑤ Junction detection</button>
+            <div class="subrow instep" id="dgt-row" style="display:none">
+              <label class="ck"><input type="checkbox" id="dgtJunc"> GT junctions (jtype)</label>
+              <span class="small muted">○ ring = GT · orange T/Y · magenta +/X · grey L</span>
+            </div>
+            <button class="step" data-dstep="6">⑥ Junction type</button>
+            <button class="step" data-dstep="7">⑦ Centerline</button>
+            <button class="step" data-dstep="8">⑧ Transects</button>
+            <button class="step" data-dstep="9">⑨ Width · measured</button>
+            <button class="step" data-dstep="10">⑩ Categorize · W0–W4</button>
+          </div>
+          <div class="hint" id="deploy-caption">Pick Bhopal 7 or 8, then Next ▶.</div>
+          <div class="check" id="deploy-check"></div>
+        </details>
+      </div>
+
+      <!-- ============ ② VERTICAL CLEARANCE ============ -->
+      <div class="stage-panel" id="stage-clearance">
+        <div class="stage-head"><h2>Vertical clearance</h2></div>
+        <div class="hint">Walk the clearance pipeline one step at a time. Wire &amp; structure are
+          <b>permanent</b> constraints; vegetation is <b>treatable</b> (pruning) — step ⑦ shows both
+          classifications and lists the pruning-recommendation spots. <b>Click the road</b> to pop a
+          station's clearance info (reading, H-class, binding class) at the point.</div>
+
+        <div class="stepper">
+          <button id="cstep-clear">✕ Clear</button>
+          <button id="cstep-prev">◀ Back</button>
+          <button id="cstep-next">Next ▶</button>
+          <button id="cstep-last">Last ⇥</button>
+        </div>
+        <div class="counts" id="clr-caption">Point cloud only — Next ▶ to begin.</div>
+        <div class="steps" id="clr-steps">
+          <button class="step" data-cstep="1">① Road datum · plane-fit z<sub>road</sub></button>
+          <button class="step" data-cstep="2">② Overhead streams · class palette</button>
+          <button class="step" data-cstep="3">③ Outlier removal · isolated returns</button>
+          <button class="step" data-cstep="4">④ Gather tube · transect boxes + junction cylinders</button>
+          <button class="step" data-cstep="5">⑤ Above-datum filter · &gt;0.5 m</button>
+          <button class="step" data-cstep="6">⑥ Clearance evidence · 5th-pctile + wire fit</button>
+          <button class="step" data-cstep="7">⑦ Clearance profile · ribbon</button>
+          <button class="step" data-cstep="8">⑧ Categorize · H0–H3</button>
+          <button class="step" data-cstep="9">⑨ Responsible points · critical stations</button>
+        </div>
+        <div class="subrow" id="hclass-row" style="display:none">
+          <button class="wcls active" data-hc="0" style="--wc:#e0584a">H0</button>
+          <button class="wcls active" data-hc="1" style="--wc:#e8a33d">H1</button>
+          <button class="wcls active" data-hc="2" style="--wc:#2aa6b0">H2</button>
+          <button class="wcls active" data-hc="3" style="--wc:#3fb950">H3</button>
+        </div>
+        <div class="subrow" id="perm-row" style="display:none">
+          <label class="ck"><input type="checkbox" id="perm-only"> permanent only (wire + structure) —
+            the after-pruning view</label>
+        </div>
+        <div class="check" id="clr-check"></div>
+        <div class="ro" id="vert-ro" style="margin-top:8px">—</div>
+
+        <!-- Standards-based clearance classes (IRC / CMVR; vehicles = named instances) -->
+        <details class="panel" open>
+          <summary>Clearance classes · H0–H3 (standards-based)</summary>
+          <table class="wtiers">
+            <tr><td><span class="sw" style="background:#e0584a"></span><b>H0</b></td><td>&lt; 2.8 m</td><td>—</td><td class="muted">sub-vehicle</td></tr>
+            <tr><td><span class="sw" style="background:#e8a33d"></span><b>H1</b></td><td>2.8 – 3.8 m</td><td>🚑</td><td class="muted">below CMVR 3.8 m vehicle cap</td></tr>
+            <tr><td><span class="sw" style="background:#2aa6b0"></span><b>H2</b></td><td>3.8 – 5.0 m</td><td>🚒🪜</td><td class="muted">truck band — clears cap, below IRC road min</td></tr>
+            <tr><td><span class="sw" style="background:#3fb950"></span><b>H3</b></td><td>≥ 5.0 m</td><td>✓</td><td class="muted">IRC-clear — meets IRC road clearance min</td></tr>
+          </table>
+          <div class="hint">Vehicles are <b>named instances</b> on the scale (ambulance → H1, fire &amp;
+            ladder → H2); strict IRC compliance = width ≥ <b>W2</b> ∧ clearance <b>H3</b>.
+            Sources: IRC 54-1974 (road clearance) · IRC 32-1969 (overhead wires) · CMVR Rule 93.</div>
+        </details>
+
+        <!-- clearance-stage legend -->
+        <div class="card">
+          <h3>Legend · clearance layers</h3>
+          <div class="legend">
+            <div><span class="sw" style="background:linear-gradient(90deg,#ffff00,#65d965,#a43838)"></span>② streams
+              — DATASET class palette (wire yellow, veg greens, buildings reds — as in
+              "Explore the classified scenes")</div>
+            <div><span class="sw" style="background:#ff4d4d"></span>③ SOR-removed isolated returns</div>
+            <div><span class="sw" style="background:#00d2ff"></span>road boundary (always on in this stage)</div>
+            <div><span class="sw" style="background:#d4a017;opacity:.35"></span>④ gather: transect boxes + junction cylinders (to 5 m)</div>
+            <div><span class="sw" style="background:#ffc93d"></span>fitted wire span — analytic sag curve (clipped to road)</div>
+            <div><span class="sw" style="background:#ffffff;border:1px solid #555"></span>5th-pctile = the clearance</div>
+            <div><span class="sw" style="background:#ff3b30"></span>intruding overhead (above clr, &lt; ladder roof)</div>
+            <div><span class="sw" style="background:#6b7480"></span>stray below clr (percentile ignores)</div>
+            <div><span class="sw" style="background:#ff3b30;opacity:.5"></span>⑨ red outline = CRITICAL station's gather volume</div>
+            <div><span class="sw" style="background:#ff9f1a"></span>⑨ orange = obstruction-causing points · white = 5th-pctile</div>
+            <div><span class="sw" style="background:#c0392b"></span>red box (transp.) = vertical inaccessibility</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ ③ ACCESSIBILITY ============ -->
+      <div class="stage-panel" id="stage-access">
+        <div class="stage-head"><h2>Overall accessibility</h2></div>
+        <div class="hint"><b>Accessibility = the (W, H) class pair per station</b> — the standards-based
+          combination of carriageway width and vertical clearance. The centerline ribbon shows the combined
+          class: <b>A0</b> inaccessible (W0 ∨ H0) · <b>A1</b> ambulance (≥W1 ∧ ≥H1) ·
+          <b>A2</b> fire &amp; ladder (≥W2 ∧ ≥H2) · <b>A3</b> strict IRC (≥W2 ∧ H3).</div>
+        <div class="steps" id="acc-steps">
+          <button class="step" data-astep="1">① Width classes · W-ribbon</button>
+          <button class="step" data-astep="2">② Clearance classes · H-ribbon</button>
+          <button class="step" data-astep="3">③ Combined A-classes · W × H</button>
+          <button class="step" data-astep="4">④ Blocked runs · boxes + beacons</button>
+        </div>
+        <div class="counts" id="acc-caption"></div>
+        <div id="axh-matrix" style="margin-top:8px">—</div>
+        <div class="hint" style="margin-top:8px"><b>Click the road</b> — the section's full story
+          (width→W · clearance→H · binding class · A) pops at the point, like a measurement.</div>
+
+        <table id="meta-table" style="margin-top:10px">
+          <tr class="muted"><td>vehicle</td><td class="r">edge %</td><td class="r">section %</td></tr>
+          <tr><td>🚑 ambulance</td><td class="r" id="amb_e">—</td><td class="r" id="amb_s">—</td></tr>
+          <tr><td>🚒 fire truck</td><td class="r" id="fire_e">—</td><td class="r" id="fire_s">—</td></tr>
+          <tr><td>🪜 ladder</td><td class="r" id="ladder_e">—</td><td class="r" id="ladder_s">—</td></tr>
+        </table>
+
+        <!-- access-stage legend -->
+        <div class="card">
+          <h3>Legend · accessibility (A = W × H)</h3>
+          <div class="legend">
+            <div><span class="sw" style="background:#e0584a"></span>A0 inaccessible — W0 ∨ H0</div>
+            <div><span class="sw" style="background:#e8a33d"></span>A1 🚑 ambulance — ≥W1 ∧ ≥H1</div>
+            <div><span class="sw" style="background:#2aa6b0"></span>A2 🚒🪜 fire &amp; ladder — ≥W2 ∧ ≥H2</div>
+            <div><span class="sw" style="background:#3fb950"></span>A3 ✓ strict IRC — ≥W2 ∧ H3</div>
+            <div><span class="sw" style="background:#55606e"></span>grey ribbon = unmeasured (junction interior)</div>
+            <div><span class="sw" style="background:#c0392b"></span>vertical-block box</div>
+            <div><span class="sw" style="background:#e0584a"></span>🔆 beacon = worst spot of a blocked run</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ shared: measure tools ============ -->
+      <div class="card read">
+        <h3>Measure</h3>
+        <!-- Jump to a UTM coordinate (e.g. from the GT worklist): flies the camera + drops a pin. -->
+        <div style="display:flex; gap:6px; margin-bottom:8px">
+          <input id="goto-utm" placeholder="go to UTM:  745643.1 2573928.1"
+                 style="flex:1; min-width:0; background:var(--card); color:var(--fg);
+                        border:1px solid var(--border); border-radius:6px; padding:6px 8px;
+                        font-family:inherit; font-size:12px" />
+          <button id="goto-btn" style="width:auto; padding:6px 12px">Go</button>
+        </div>
+        <div style="display:flex; gap:6px; margin-bottom:6px">
+          <button id="measure-btn" style="flex:1">▶ Activate measure</button>
+          <button id="topview-btn" title="Straight-down view — easiest for clicking width straight across"
+                  style="width:auto; padding:6px 12px">⬇ Top</button>
+        </div>
+        <button id="lowest-btn" style="margin-bottom:10px"
+                title="One click on the road: the LOWEST overhead point within 1.5 m above it is found automatically, ringed, and measured — verify the ringed point is a real object, then read ↕">
+          ▼ Lowest overhead (1 click)</button>
+        <div class="hint" style="margin-bottom:6px">width = 2 clicks ACROSS the road (read ↔) ·
+          clearance = road point + lowest overhead point (read ↕)</div>
+        <label style="display:flex; gap:6px; align-items:center; margin-bottom:4px; font-size:12px; cursor:pointer">
+          <input id="overhead-chk" type="checkbox" />
+          show overhead points (wire&nbsp;· vegetation) — needed to click the wire</label>
+        <label style="display:flex; gap:6px; align-items:center; margin-bottom:8px; font-size:12px; cursor:pointer"
+               title="The full surroundings cloud: curbs, walls, parked vehicles, footpaths — judge WHERE the drivable road really ends">
+          <input id="surround-chk" type="checkbox" />
+          show surroundings — judge the road edge (curb&nbsp;· wall&nbsp;· parked&nbsp;vehicle)</label>
+        <table>
+          <tr><td>↔ horizontal</td><td class="r"><span class="big" id="m_horiz" style="color:#2aa6b0">—</span> m</td></tr>
+          <tr><td>↕ vertical</td><td class="r"><span class="big" id="m_vert" style="color:#e8a33d">—</span> m</td></tr>
+          <tr><td>3D distance</td><td class="r" id="m_total">— m</td></tr>
+        </table>
+        <!-- bare numbers, ready to paste into the gt_fill.py prompt -->
+        <div style="display:flex; gap:6px; margin-top:6px">
+          <button id="copy-w-btn" style="flex:1">Copy ↔ width</button>
+          <button id="copy-h-btn" style="flex:1">Copy ↕ clearance</button>
+        </div>
+        <div class="ro" style="margin-top:8px">Clicked point — last pick:</div>
+        <table>
+          <tr><td>local&nbsp;x,&nbsp;y,&nbsp;z</td><td class="r" id="m_pos_local">—</td></tr>
+          <tr><td>world&nbsp;x,&nbsp;y,&nbsp;z</td><td class="r" id="m_pos_world">—</td></tr>
+        </table>
+        <button id="copy-pos-btn" style="margin-top:6px">Copy world x,y,z</button>
+        <button id="clear-btn" style="margin-top:8px">Clear measurement</button>
+
+        <label class="fld">Point size</label>
+        <div class="slider"><input id="size-slider" type="range" min="0.02" max="0.25" step="0.01" value="0.06" />
+          <span id="size-val" class="hint">0.06</span></div>
+        <label class="fld">Line width (boundary + transects)</label>
+        <div class="slider"><input id="boundary-slider" type="range" min="1" max="8" step="1" value="3" />
+          <span id="boundary-val" class="hint">3</span></div>
+        <label class="ck" id="median-ck" style="margin-top:10px;display:none">
+          <input type="checkbox" id="medianRso" checked>
+          <span class="sw" style="background:#f0a523"></span>median
+          <span class="sw" style="background:#788eb2;margin-left:6px"></span>road-side objects
+          <span class="small muted" style="margin-left:4px" id="median-cnt"></span></label>
+      </div>
+
+      <!-- Threshold standards basis — width + height, with the exact published reference for each. -->
+      <details class="panel" style="margin-top:14px">
+        <summary>📐 Standards basis (IRC · IFC · CMVR)</summary>
+        <div class="ro" style="line-height:1.6">
+          <b>Width — minimum passage width</b><br>
+          • Ambulance <b>3.0 m</b> — residential access lane; body 1.93 m + clearance.<br>
+          • Fire truck <b>3.5 m</b> — one urban traffic lane
+            (<a href="https://law.resource.org/pub/in/bis/irc/irc.gov.in.086.2018.pdf" target="_blank" rel="noopener">IRC 86-2018</a>,
+            §lane width: urban lane 3.5 m, single-lane carriageway 3.75 m).<br>
+          • Ladder truck <b>3.5 m</b> — same ~2.55 m chassis as the fire tender, so the same lane
+            (max vehicle width 2.5 m, <a href="https://indiankanoon.org/doc/58396086/" target="_blank" rel="noopener">CMVR Rule 93</a>;
+            IRC max permissible 2.44 m). It differs from the fire truck by <i>height</i>, not lane width.<br>
+          <span style="color:#8b98a8">Aside: 6.0 m is an aerial <i>setup</i> figure (outrigger spread), not a driving width —
+            cf. <a href="https://codes.iccsafe.org/s/IFC2021P1/appendix-d-fire-apparatus-access-roads/IFC2021P1-Pt07-AppxD-SecD105" target="_blank" rel="noopener">IFC 2021 §D105.2</a>
+            (aerial-apparatus access road 26 ft = 7.9 m).</span>
+          <br><br>
+          <b>Height — minimum overhead clearance</b><br>
+          • Ambulance <b>3.5 m</b> · Fire <b>4.5 m</b> · Ladder <b>5.0 m</b> = vehicle height
+            (2.79 / 3.46 / 3.64 m) + margin, under the
+            <a href="https://indiankanoon.org/doc/58396086/" target="_blank" rel="noopener">CMVR Rule 93</a> 3.8 m vehicle cap.<br>
+          • Ladder 5.0 m matches the IRC road vertical-clearance minimum
+            (<a href="https://law.resource.org/pub/in/bis/irc/translate/irc.gov.in.054.1974.html" target="_blank" rel="noopener">IRC 54-1974</a> underpass 5.0 m;
+            <a href="https://law.resource.org/pub/in/bis/irc/irc.gov.in.086.2018.pdf" target="_blank" rel="noopener">IRC 86-2018</a> urban 5.5 m).<br>
+          • Overhead power/telecom wire clearance over roads:
+            <a href="https://law.resource.org/pub/in/bis/irc/irc.gov.in.032.1969.pdf" target="_blank" rel="noopener">IRC 32-1969</a>.
+        </div>
+      </details>
+
+      <div class="hint" style="margin-top:14px">Orbit: drag · Pan: right-drag / two-finger · Zoom: scroll.
+        Same .ply opens in CloudCompare for cross-checking.</div>
+    </aside>
+    <div id="viewer">
+      <div id="measure-viewer"></div>
+      <div id="view-status">—</div>
+    </div>
+  </div>
+</body>
+</html>

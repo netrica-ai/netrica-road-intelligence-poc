@@ -1,0 +1,432 @@
+{
+  "bhopal": {
+    "city": "bhopal",
+    "typology": "dense historical core",
+    "scenes": [
+      {
+        "id": "bhopal_dominant",
+        "city": "bhopal",
+        "role": "dominant",
+        "label": "Dominant class",
+        "scene": "S6_0004_e",
+        "typology": "dense historical core",
+        "appearance": "rgb",
+        "ply": "clouds/scenes/bhopal_dominant.ply",
+        "thumb": "figures/scene_thumbs/bhopal_dominant.jpg",
+        "offset": [
+          745919.258,
+          2574391.201,
+          453.994
+        ],
+        "source_path": "6",
+        "source_pts": 8456492,
+        "extent_m": [
+          23.0,
+          60.1
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 13,
+        "classes_present": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "class_counts": {
+          "0": 28753,
+          "2": 739992,
+          "3": 104790,
+          "4": 39838,
+          "5": 11259,
+          "7": 18532,
+          "8": 405,
+          "9": 1001,
+          "10": 6804,
+          "11": 48626
+        }
+      },
+      {
+        "id": "bhopal_width",
+        "city": "bhopal",
+        "role": "width",
+        "label": "Effective width",
+        "scene": "S1_0038",
+        "typology": "dense historical core",
+        "appearance": "rgb",
+        "ply": "clouds/scenes/bhopal_width.ply",
+        "thumb": "figures/scene_thumbs/bhopal_width.jpg",
+        "offset": [
+          746060.495,
+          2574361.183,
+          456.497
+        ],
+        "source_path": "7",
+        "source_pts": 2087300,
+        "extent_m": [
+          53.5,
+          30.1
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 11,
+        "classes_present": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          9,
+          10,
+          11
+        ],
+        "class_counts": {
+          "0": 22166,
+          "1": 221284,
+          "2": 301518,
+          "3": 202149,
+          "4": 10249,
+          "5": 4795,
+          "7": 216861,
+          "9": 15668,
+          "10": 509,
+          "11": 4801
+        }
+      },
+      {
+        "id": "bhopal_vertical",
+        "city": "bhopal",
+        "role": "vertical",
+        "label": "Overhead clearance",
+        "scene": "S2_0005",
+        "typology": "dense historical core",
+        "appearance": "rgb",
+        "ply": "clouds/scenes/bhopal_vertical.ply",
+        "thumb": "figures/scene_thumbs/bhopal_vertical.jpg",
+        "offset": [
+          745401.899,
+          2574207.221,
+          463.641
+        ],
+        "source_path": "4",
+        "source_pts": 3485382,
+        "extent_m": [
+          53.5,
+          50.7
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 11,
+        "classes_present": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          10,
+          11
+        ],
+        "class_counts": {
+          "0": 60268,
+          "2": 20555,
+          "3": 541430,
+          "4": 127478,
+          "5": 15518,
+          "6": 32302,
+          "7": 149335,
+          "8": 18930,
+          "10": 20436,
+          "11": 13748
+        }
+      }
+    ]
+  },
+  "kerala": {
+    "city": "kerala",
+    "typology": "vegetated semi-urban",
+    "scenes": [
+      {
+        "id": "kerala_dominant",
+        "city": "kerala",
+        "role": "dominant",
+        "label": "Dominant class",
+        "scene": "KE_14_s022",
+        "typology": "vegetated semi-urban",
+        "appearance": "intensity",
+        "ply": "clouds/scenes/kerala_dominant.ply",
+        "thumb": "figures/scene_thumbs/kerala_dominant.jpg",
+        "offset": [
+          710785.318,
+          963229.065,
+          31.451
+        ],
+        "source_path": "14",
+        "source_pts": 8998512,
+        "extent_m": [
+          41.1,
+          65.1
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 21,
+        "classes_present": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          9
+        ],
+        "class_counts": {
+          "0": 238488,
+          "1": 412210,
+          "2": 99027,
+          "3": 183778,
+          "4": 6457,
+          "5": 6511,
+          "7": 11621,
+          "9": 41908
+        }
+      },
+      {
+        "id": "kerala_width",
+        "city": "kerala",
+        "role": "width",
+        "label": "Effective width",
+        "scene": "KE_70_s016",
+        "typology": "vegetated semi-urban",
+        "appearance": "intensity",
+        "ply": "clouds/scenes/kerala_width.ply",
+        "thumb": "figures/scene_thumbs/kerala_width.jpg",
+        "offset": [
+          710195.492,
+          959834.999,
+          55.805
+        ],
+        "source_path": "70",
+        "source_pts": 4438923,
+        "extent_m": [
+          51.0,
+          50.6
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 11,
+        "classes_present": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "class_counts": {
+          "0": 78854,
+          "2": 234521,
+          "3": 470099,
+          "4": 12981,
+          "5": 13605,
+          "6": 452,
+          "7": 95959,
+          "8": 81141,
+          "9": 1040,
+          "10": 11348
+        }
+      },
+      {
+        "id": "kerala_vertical",
+        "city": "kerala",
+        "role": "vertical",
+        "label": "Overhead clearance",
+        "scene": "KE_02_s022",
+        "typology": "vegetated semi-urban",
+        "appearance": "intensity",
+        "ply": "clouds/scenes/kerala_vertical.ply",
+        "thumb": "figures/scene_thumbs/kerala_vertical.jpg",
+        "offset": [
+          709606.162,
+          963561.906,
+          51.328
+        ],
+        "source_path": "2",
+        "source_pts": 5228669,
+        "extent_m": [
+          44.0,
+          62.9
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 11,
+        "classes_present": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          9,
+          10
+        ],
+        "class_counts": {
+          "0": 140109,
+          "1": 487760,
+          "2": 56546,
+          "3": 199848,
+          "4": 6214,
+          "5": 16066,
+          "7": 5321,
+          "9": 86520,
+          "10": 1616
+        }
+      }
+    ]
+  },
+  "chandigarh": {
+    "city": "chandigarh",
+    "typology": "planned grid",
+    "scenes": [
+      {
+        "id": "chandigarh_dominant",
+        "city": "chandigarh",
+        "role": "dominant",
+        "label": "Dominant class",
+        "scene": "CH_16_s047",
+        "typology": "planned grid",
+        "appearance": "intensity",
+        "ply": "clouds/scenes/chandigarh_dominant.ply",
+        "thumb": "figures/scene_thumbs/chandigarh_dominant.jpg",
+        "offset": [
+          672028.786,
+          3401472.401,
+          344.426
+        ],
+        "source_path": "16",
+        "source_pts": 15610887,
+        "extent_m": [
+          60.5,
+          30.6
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 35,
+        "classes_present": [
+          0,
+          1,
+          3,
+          4,
+          5,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "class_counts": {
+          "0": 11394,
+          "1": 491110,
+          "3": 381501,
+          "4": 28,
+          "5": 2631,
+          "7": 25390,
+          "8": 1054,
+          "9": 29787,
+          "10": 187,
+          "11": 56918
+        }
+      },
+      {
+        "id": "chandigarh_width",
+        "city": "chandigarh",
+        "role": "width",
+        "label": "Effective width",
+        "scene": "CH_64_s021",
+        "typology": "planned grid",
+        "appearance": "intensity",
+        "ply": "clouds/scenes/chandigarh_width.ply",
+        "thumb": "figures/scene_thumbs/chandigarh_width.jpg",
+        "offset": [
+          670896.107,
+          3399835.272,
+          332.635
+        ],
+        "source_path": "64",
+        "source_pts": 9260356,
+        "extent_m": [
+          49.1,
+          64.0
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 21,
+        "classes_present": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          7,
+          9,
+          10
+        ],
+        "class_counts": {
+          "0": 188545,
+          "1": 207327,
+          "2": 210181,
+          "3": 238277,
+          "4": 5012,
+          "5": 7107,
+          "7": 84254,
+          "9": 58496,
+          "10": 801
+        }
+      },
+      {
+        "id": "chandigarh_vertical",
+        "city": "chandigarh",
+        "role": "vertical",
+        "label": "Overhead clearance",
+        "scene": "CH_14_s032",
+        "typology": "planned grid",
+        "appearance": "intensity",
+        "ply": "clouds/scenes/chandigarh_vertical.ply",
+        "thumb": "figures/scene_thumbs/chandigarh_vertical.jpg",
+        "offset": [
+          671971.336,
+          3401592.092,
+          345.404
+        ],
+        "source_path": "14",
+        "source_pts": 10564402,
+        "extent_m": [
+          42.5,
+          48.8
+        ],
+        "n_points": 1000000,
+        "n_scenes_combined": 21,
+        "classes_present": [
+          1,
+          3,
+          5,
+          9
+        ],
+        "class_counts": {
+          "1": 543748,
+          "3": 395852,
+          "5": 14348,
+          "9": 46052
+        }
+      }
+    ]
+  }
+}
